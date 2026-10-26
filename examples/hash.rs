@@ -2,6 +2,7 @@ use std::path;
 
 use duckdb::arrow::datatypes::ToByteSlice;
 use filesize::PathExt;
+
 use image_indexing_engine::hash::hash_image;
 
 fn main() -> anyhow::Result<()> {
