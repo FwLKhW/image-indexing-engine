@@ -28,7 +28,7 @@ pub struct IndexedImage {
     pub modified: u64,
     pub rating: u32,
     pub description: SmolStr,
-    pub tags: Vec<SmolStr>,
+    pub tags: Vec<String>,
     pub palette: Vec<[f32; 3]>,
 }
 
