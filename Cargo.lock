@@ -939,6 +939,7 @@ dependencies = [
  "image",
  "oklab",
  "okmain",
+ "rayon",
  "rgb",
  "smol_str",
 ]

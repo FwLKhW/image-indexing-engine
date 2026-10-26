@@ -1,15 +1,20 @@
 use std::{
-    fs,
+    fs::{self, create_dir_all},
     os::windows::fs::MetadataExt,
     path::Path,
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use anyhow::Ok;
-use image::EncodableLayout;
+use anyhow::{Context, Ok, Result};
+use image::{DynamicImage, EncodableLayout};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use smol_str::SmolStr;
 
-use crate::{color::extract_palette, hash::hash_image};
+use crate::{
+    color::extract_palette, hash::hash_image, scan::scan_images, thumbnail::generate_thumbnail,
+};
+
+const DOT_FOLDER: &str = ".eyeris";
 
 #[derive(Debug)]
 pub struct IndexedImage {
@@ -25,8 +30,7 @@ pub struct IndexedImage {
     pub palette: Vec<[f32; 3]>,
 }
 
-pub fn index_image<P: AsRef<Path>>(path: P) -> anyhow::Result<IndexedImage> {
-    let img = image::open(&path)?;
+pub fn index_image<P: AsRef<Path>>(path: P, img: &DynamicImage) -> Result<IndexedImage> {
     let rgb8_img = img.to_rgb8();
     let rgba16_img = img.to_rgba16();
 
@@ -49,7 +53,7 @@ pub fn index_image<P: AsRef<Path>>(path: P) -> anyhow::Result<IndexedImage> {
             .unwrap_or_default()
             .into(),
         format: format.into(),
-        size: size,
+        size,
         width: img.width(),
         height: img.height(),
         created: metadata
@@ -64,11 +68,40 @@ pub fn index_image<P: AsRef<Path>>(path: P) -> anyhow::Result<IndexedImage> {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis() as u64,
-        hash: hash_image(rgba16_img.as_bytes(), &format, size),
+        hash: hash_image(rgba16_img.as_bytes(), format, size),
         palette: extract_palette(&rgb8_img).unwrap_or_default(),
     })
 }
 
-pub fn index_folder<P: AsRef<Path>>(path: P) {
-    
+pub fn index_and_thumbnail<P: AsRef<Path>>(path: P) -> Result<IndexedImage> {
+    let img = image::open(&path).context("can not open image path")?;
+
+    let indexed_image = index_image(&path, &img).context("failed index image")?;
+    let thumbnail = generate_thumbnail(&img);
+
+    let file_name = &indexed_image.hash;
+    thumbnail
+        .save(path.as_ref().join(format!("{DOT_FOLDER}/{file_name}.png")))
+        .context("failed save thumbnail")?;
+
+    Ok(indexed_image)
+}
+
+pub fn index_folder<P: AsRef<Path>>(path: P) -> Result<Vec<IndexedImage>> {
+    let image_paths = scan_images(&path)?;
+
+    create_dir_all(path.as_ref().join(DOT_FOLDER))?;
+
+    let indexed_images: Vec<IndexedImage> = image_paths
+        .par_iter()
+        .filter_map(|p| index_and_thumbnail(p).ok())
+        .collect();
+
+    println!(
+        "Indexed {}/{} images.",
+        indexed_images.len(),
+        image_paths.len()
+    );
+
+    Ok(indexed_images)
 }
