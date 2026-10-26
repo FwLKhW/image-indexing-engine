@@ -1,14 +1,15 @@
 use std::path::Path;
 
+use anyhow::Result;
 use image::{ImageBuffer, Rgb};
 
-pub fn extract_palette_from_path<P: AsRef<Path>>(path: P) -> anyhow::Result<Vec<[f32; 3]>> {
+pub fn extract_palette_from_path<P: AsRef<Path>>(path: P) -> Result<Vec<[f32; 3]>> {
     let img = image::open(path)?.to_rgb8();
 
     extract_palette(&img)
 }
 
-pub fn extract_palette(rgb8_img: &ImageBuffer<Rgb<u8>, Vec<u8>>) -> anyhow::Result<Vec<[f32; 3]>> {
+pub fn extract_palette(rgb8_img: &ImageBuffer<Rgb<u8>, Vec<u8>>) -> Result<Vec<[f32; 3]>> {
     let (width, height) = rgb8_img.dimensions();
 
     let input = okmain::InputImage::from_bytes(width as u16, height as u16, rgb8_img.as_raw())?;
