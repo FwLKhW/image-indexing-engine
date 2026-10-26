@@ -5,8 +5,10 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.104"
+blake3 = "1.8.7"
 colored_text = "0.6.0"
 duckdb = { version = "1.20000.0", features = ["bundled"] }
+filesize = "0.2.0"
 image = "0.25.10"
 oklab = "1.1.2"
 okmain = "0.2.0"
