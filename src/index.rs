@@ -73,15 +73,15 @@ pub fn index_image<P: AsRef<Path>>(path: P, img: &DynamicImage) -> Result<Indexe
     })
 }
 
-pub fn index_and_thumbnail<P: AsRef<Path>>(path: P) -> Result<IndexedImage> {
-    let img = image::open(&path).context("can not open image path")?;
+pub fn index_and_thumbnail<P: AsRef<Path>>(image_path: P, thumb_path: P) -> Result<IndexedImage> {
+    let img = image::open(&image_path).context("can not open image path")?;
 
-    let indexed_image = index_image(&path, &img).context("failed index image")?;
+    let indexed_image = index_image(&image_path, &img).context("failed index image")?;
     let thumbnail = generate_thumbnail(&img);
 
     let file_name = &indexed_image.hash;
     thumbnail
-        .save(path.as_ref().join(format!("{DOT_FOLDER}/{file_name}.png")))
+        .save(thumb_path.as_ref().join(format!("{file_name}.png")))
         .context("failed save thumbnail")?;
 
     Ok(indexed_image)
@@ -90,11 +90,14 @@ pub fn index_and_thumbnail<P: AsRef<Path>>(path: P) -> Result<IndexedImage> {
 pub fn index_folder<P: AsRef<Path>>(path: P) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(&path)?;
 
-    create_dir_all(path.as_ref().join(DOT_FOLDER))?;
+    println!("Found {} image.", image_paths.len());
+
+    let thumb_path = path.as_ref().join(format!("{DOT_FOLDER}/thumbnails"));
+    create_dir_all(&thumb_path)?;
 
     let indexed_images: Vec<IndexedImage> = image_paths
         .par_iter()
-        .filter_map(|p| index_and_thumbnail(p).ok())
+        .filter_map(|p| index_and_thumbnail(p, &thumb_path).ok())
         .collect();
 
     println!(
