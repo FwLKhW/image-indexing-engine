@@ -11,13 +11,13 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use smol_str::SmolStr;
 
 use crate::{
-    color::extract_palette, hash::hash_image, scan::scan_images, thumbnail::generate_thumbnail,
+    color::extract_palette, hash::hash_image, paths::THUMBNAILS_PATH, scan::scan_images,
+    thumbnail::generate_thumbnail,
 };
-
-const DOT_FOLDER: &str = ".eyeris";
 
 #[derive(Debug)]
 pub struct IndexedImage {
+    pub hash: String,
     pub path: SmolStr,
     pub name: SmolStr,
     pub format: SmolStr,
@@ -26,7 +26,9 @@ pub struct IndexedImage {
     pub height: u32,
     pub created: u64,
     pub modified: u64,
-    pub hash: String,
+    pub rating: u32,
+    pub description: SmolStr,
+    pub tags: Vec<SmolStr>,
     pub palette: Vec<[f32; 3]>,
 }
 
@@ -44,6 +46,7 @@ pub fn index_image<P: AsRef<Path>>(path: P, img: &DynamicImage) -> Result<Indexe
     let size = metadata.file_size();
 
     Ok(IndexedImage {
+        hash: hash_image(rgba16_img.as_bytes(), format, size),
         path: path.as_ref().to_string_lossy().into(),
         name: path
             .as_ref()
@@ -68,7 +71,9 @@ pub fn index_image<P: AsRef<Path>>(path: P, img: &DynamicImage) -> Result<Indexe
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis() as u64,
-        hash: hash_image(rgba16_img.as_bytes(), format, size),
+        rating: 0,
+        description: "".into(),
+        tags: vec![],
         palette: extract_palette(&rgb8_img).unwrap_or_default(),
     })
 }
@@ -101,7 +106,7 @@ pub fn index_folder<P: AsRef<Path>>(path: P) -> Result<Vec<IndexedImage>> {
 
     println!("Found {} images.", total_images);
 
-    let thumb_path = path.as_ref().join(format!("{DOT_FOLDER}/thumbnails"));
+    let thumb_path = path.as_ref().join(THUMBNAILS_PATH);
     create_dir_all(&thumb_path)?;
 
     let indexed_images = image_paths
