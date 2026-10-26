@@ -1,9 +1,9 @@
-use image_indexing_engine::indexing::indexing;
+use image_indexing_engine::index::index_image;
 
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
-    let data = indexing(&args[1])?;
+    let data = index_image(&args[1])?;
 
     println!("{data:#?}");
 

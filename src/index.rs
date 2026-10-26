@@ -25,7 +25,7 @@ pub struct IndexedImage {
     pub palette: Vec<[f32; 3]>,
 }
 
-pub fn indexing<P: AsRef<Path>>(path: P) -> anyhow::Result<IndexedImage> {
+pub fn index_image<P: AsRef<Path>>(path: P) -> anyhow::Result<IndexedImage> {
     let img = image::open(&path)?;
     let rgb8_img = img.to_rgb8();
     let rgba16_img = img.to_rgba16();
@@ -67,4 +67,8 @@ pub fn indexing<P: AsRef<Path>>(path: P) -> anyhow::Result<IndexedImage> {
         hash: hash_image(rgba16_img.as_bytes(), &format, size),
         palette: extract_palette(&rgb8_img).unwrap_or_default(),
     })
+}
+
+pub fn index_folder<P: AsRef<Path>>(path: P) {
+    
 }
