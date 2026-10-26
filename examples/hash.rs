@@ -17,7 +17,7 @@ fn main() -> anyhow::Result<()> {
         .unwrap_or_default();
     let size = path.size_on_disk()?;
 
-    let hash_result = hash_image(&img.to_rgba16().to_byte_slice(), format, size);
+    let hash_result = hash_image(img.to_rgba16().to_byte_slice(), format, size);
 
     println!("{hash_result}");
 
