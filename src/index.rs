@@ -74,37 +74,57 @@ pub fn index_image<P: AsRef<Path>>(path: P, img: &DynamicImage) -> Result<Indexe
 }
 
 pub fn index_and_thumbnail<P: AsRef<Path>>(image_path: P, thumb_path: P) -> Result<IndexedImage> {
-    let img = image::open(&image_path).context("can not open image path")?;
+    let img = image::open(&image_path)
+        .with_context(|| format!("can not open image at {:?}", image_path.as_ref()))?;
 
-    let indexed_image = index_image(&image_path, &img).context("failed index image")?;
+    let indexed_image = index_image(&image_path, &img)
+        .with_context(|| format!("failed index image {:?}", image_path.as_ref()))?;
     let thumbnail = generate_thumbnail(&img);
 
-    let file_name = &indexed_image.hash;
-    thumbnail
-        .save(thumb_path.as_ref().join(format!("{file_name}.png")))
-        .context("failed save thumbnail")?;
+    let thumbnail_save_path = thumb_path
+        .as_ref()
+        .join(format!("{}.png", indexed_image.hash));
+    thumbnail.save(&thumbnail_save_path).with_context(|| {
+        format!(
+            "failed save thumbnail for {:?} at {:?}",
+            image_path.as_ref(),
+            thumbnail_save_path
+        )
+    })?;
 
     Ok(indexed_image)
 }
 
 pub fn index_folder<P: AsRef<Path>>(path: P) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(&path)?;
+    let total_images = image_paths.len();
 
-    println!("Found {} image.", image_paths.len());
+    println!("Found {} images.", total_images);
 
     let thumb_path = path.as_ref().join(format!("{DOT_FOLDER}/thumbnails"));
     create_dir_all(&thumb_path)?;
 
-    let indexed_images: Vec<IndexedImage> = image_paths
+    let indexed_images = image_paths
         .par_iter()
-        .filter_map(|p| index_and_thumbnail(p, &thumb_path).ok())
-        .collect();
+        .map(|p| index_and_thumbnail(p, &thumb_path));
+
+    let err_count = indexed_images.clone().filter(|i| i.is_err()).count();
 
     println!(
         "Indexed {}/{} images.",
-        indexed_images.len(),
-        image_paths.len()
+        total_images - err_count,
+        total_images
     );
 
-    Ok(indexed_images)
+    if err_count < 100 {
+        indexed_images.clone().for_each(|i| {
+            if i.is_err() {
+                println!("{i:?}")
+            }
+        });
+    }
+
+    let success_indexed_images: Vec<IndexedImage> = indexed_images.filter_map(|i| i.ok()).collect();
+
+    Ok(success_indexed_images)
 }
