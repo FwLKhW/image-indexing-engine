@@ -1,0 +1,13 @@
+[package]
+name = "image-indexing-engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+colored_text = "0.6.0"
+duckdb = { version = "1.20000.0", features = ["bundled"] }
+image = "0.25.10"
+oklab = "1.1.2"
+okmain = "0.2.0"
+rgb = "0.8.53"
