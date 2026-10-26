@@ -20,3 +20,10 @@ smol_str = "0.3.7"
 
 [dev-dependencies]
 colored_text = "0.6.0"
+
+[profile.release]
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
