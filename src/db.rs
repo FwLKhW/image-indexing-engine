@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::index::IndexedImage;
 
-pub async fn write(db_path: &Path, indexed_images: Vec<IndexedImage>) -> Result<()> {
+pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result<()> {
     let path_str = db_path
         .to_str()
         .ok_or_else(|| anyhow::anyhow!("invalid DB path"))?;
@@ -33,6 +33,7 @@ pub async fn write(db_path: &Path, indexed_images: Vec<IndexedImage>) -> Result<
 
     let tx = conn.transaction().await?;
 
+    println!("Writing database...");
 
     for img in indexed_images {
         let tags_json = serde_json::to_string(&img.tags).expect("Failed to serialize tags");
@@ -74,6 +75,8 @@ pub async fn write(db_path: &Path, indexed_images: Vec<IndexedImage>) -> Result<
     }
 
     tx.commit().await?;
+
+    println!("Saved {} records.", indexed_images.len());
 
     Ok(())
 }

@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     let db_path = PathBuf::from(&args.folder_path).join(DB_PATH);
 
-    db::write(&db_path, indexed_images).await?;
+    db::write(&db_path, &indexed_images).await?;
 
     Ok(())
 }
