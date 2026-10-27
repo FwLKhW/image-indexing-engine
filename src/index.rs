@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, create_dir_all},
+    fs::{self, create_dir_all, remove_dir_all},
     os::windows::fs::MetadataExt,
     path::Path,
     time::{SystemTime, UNIX_EPOCH},
@@ -11,7 +11,10 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use smol_str::SmolStr;
 
 use crate::{
-    color::extract_palette, hash::hash_image, paths::THUMBNAILS_PATH, scan::scan_images,
+    color::extract_palette,
+    hash::hash_image,
+    paths::{DOT_FOLDER, THUMBNAILS_PATH},
+    scan::scan_images,
     thumbnail::generate_thumbnail,
 };
 
@@ -32,24 +35,25 @@ pub struct IndexedImage {
     pub palette: Vec<[f32; 3]>,
 }
 
-pub fn index_image<P: AsRef<Path>>(path: P, img: &DynamicImage) -> Result<IndexedImage> {
+pub fn index_image(img_path: &Path, img: &DynamicImage, root: &Path) -> Result<IndexedImage> {
     let rgb8_img = img.to_rgb8();
     let rgba16_img = img.to_rgba16();
 
-    let metadata = fs::metadata(&path)?;
-    let format = path
-        .as_ref()
+    let metadata = fs::metadata(img_path)?;
+    let format = img_path
         .extension()
         .unwrap_or_default()
         .to_str()
         .unwrap_or_default();
     let size = metadata.file_size();
+    let rel_path = img_path
+        .strip_prefix(root)
+        .with_context(|| format!("failed strip prefix {root:?} from {img_path:?}"))?;
 
     Ok(IndexedImage {
         hash: hash_image(rgba16_img.as_bytes(), format, size),
-        path: path.as_ref().to_string_lossy().into(),
-        name: path
-            .as_ref()
+        path: rel_path.to_string_lossy().into(),
+        name: img_path
             .file_stem()
             .unwrap_or_default()
             .to_str()
@@ -78,40 +82,44 @@ pub fn index_image<P: AsRef<Path>>(path: P, img: &DynamicImage) -> Result<Indexe
     })
 }
 
-pub fn index_and_thumbnail<P: AsRef<Path>>(image_path: P, thumb_path: P) -> Result<IndexedImage> {
-    let img = image::open(&image_path)
-        .with_context(|| format!("can not open image at {:?}", image_path.as_ref()))?;
+pub fn index_and_thumbnail(
+    img_path: &Path,
+    root: &Path,
+    thumb_path: &Path,
+) -> Result<IndexedImage> {
+    let img =
+        image::open(img_path).with_context(|| format!("can not open image at {:?}", img_path))?;
 
-    let indexed_image = index_image(&image_path, &img)
-        .with_context(|| format!("failed index image {:?}", image_path.as_ref()))?;
+    let indexed_image = index_image(img_path, &img, root)
+        .with_context(|| format!("failed index image {:?}", img_path))?;
     let thumbnail = generate_thumbnail(&img);
 
-    let thumbnail_save_path = thumb_path
-        .as_ref()
-        .join(format!("{}.png", indexed_image.hash));
+    let thumbnail_save_path = thumb_path.join(format!("{}.png", indexed_image.hash));
     thumbnail.save(&thumbnail_save_path).with_context(|| {
         format!(
             "failed save thumbnail for {:?} at {:?}",
-            image_path.as_ref(),
-            thumbnail_save_path
+            img_path, thumbnail_save_path
         )
     })?;
 
     Ok(indexed_image)
 }
 
-pub fn index_folder<P: AsRef<Path>>(path: P) -> Result<Vec<IndexedImage>> {
-    let image_paths = scan_images(&path)?;
+pub fn index_folder(root: &Path) -> Result<Vec<IndexedImage>> {
+    let image_paths = scan_images(root)?;
     let total_images = image_paths.len();
 
     println!("Found {} images.", total_images);
 
-    let thumb_path = path.as_ref().join(THUMBNAILS_PATH);
+    remove_dir_all(root.join(DOT_FOLDER))
+        .context("failed remove dot folder, maybe used by another program")?;
+
+    let thumb_path = root.join(THUMBNAILS_PATH);
     create_dir_all(&thumb_path)?;
 
     let indexed_images = image_paths
         .par_iter()
-        .map(|p| index_and_thumbnail(p, &thumb_path));
+        .map(|p| index_and_thumbnail(p, root, &thumb_path));
 
     let err_count = indexed_images.clone().filter(|i| i.is_err()).count();
 

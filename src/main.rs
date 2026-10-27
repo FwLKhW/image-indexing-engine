@@ -1,4 +1,8 @@
-use std::{fs, path::PathBuf, process::exit};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::exit,
+};
 
 use anyhow::Result;
 use clap::Parser;
@@ -20,7 +24,7 @@ async fn main() -> Result<()> {
         exit(1);
     }
 
-    let indexed_images = index_folder(&args.folder_path)?;
+    let indexed_images = index_folder(Path::new(&args.folder_path))?;
 
     let db_path = PathBuf::from(&args.folder_path).join(DB_PATH);
 
