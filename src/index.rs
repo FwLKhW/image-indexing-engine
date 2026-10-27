@@ -1,6 +1,5 @@
 use std::{
     fs::{self, create_dir_all, remove_dir_all},
-    os::windows::fs::MetadataExt,
     path::Path,
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -46,7 +45,7 @@ pub fn index_image(img_path: &Path, img: &DynamicImage, root: &Path) -> Result<I
         .unwrap_or_default()
         .to_str()
         .unwrap_or_default();
-    let size = metadata.file_size();
+    let size = metadata.len();
     let rel_path = img_path
         .strip_prefix(root)
         .with_context(|| format!("failed strip prefix {root:?} from {img_path:?}"))?;
