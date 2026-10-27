@@ -1,11 +1,14 @@
 use std::path::Path;
 
-use duckdb::{Connection, Result, params};
+use anyhow::Result;
 
 use crate::index::IndexedImage;
 
-pub fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>) -> Result<()> {
-    let conn = Connection::open(db_path)?;
+pub async fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>) -> Result<()> {
+    let db = turso::Builder::new_local(&db_path.as_ref().to_str().unwrap())
+        .build()
+        .await?;
+    let conn = db.connect()?;
 
     conn.execute_batch(
         r"DROP TABLE IF EXISTS images;
@@ -19,15 +22,16 @@ pub fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>) -> R
             height      UINTEGER    NOT NULL,               -- 7.  2160
             created     BIGINT      NOT NULL,               -- 8.  1792552976580
             modified    BIGINT      NOT NULL,               -- 9.  1792552976580
-            rating      INTEGER     NOT NULL DEFAULT 0,     -- 10.
-            description VARCHAR     NOT NULL DEFAULT '',    -- 11.
-            tags        VARCHAR[]   NOT NULL DEFAULT [],    -- 12.
-            palette     FLOAT[3][]                          -- 13. Array of Oklab
+            rating      INTEGER     DEFAULT 0,              -- 10.
+            description VARCHAR     DEFAULT '',             -- 11.
+            tags        VARCHAR[]   DEFAULT [],             -- 12.
+            palette     FLOAT[3][]  DEFAULT [],             -- 13. Array of Oklab
         );",
-    )?;
+    ).await?;
 
-    indexed_images.iter().for_each(|img| {
+    for img in indexed_images {
         let tags_json = serde_json::to_string(&img.tags).expect("Failed to serialize tags");
+
         let palette_json =
             serde_json::to_string(&img.palette).expect("Failed to serialize palette");
 
@@ -40,10 +44,10 @@ pub fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>) -> R
                 ?10, ?11,
                 CAST(?12 AS VARCHAR[]),
                 CAST(?13 AS FLOAT[3][])
-            )
-            "#,
-            params![
-                img.hash,
+                )
+                "#,
+            (
+                img.hash.as_str(),
                 img.path.to_string(),
                 img.name.to_string(),
                 img.format.to_string(),
@@ -58,11 +62,11 @@ pub fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>) -> R
                 img.description.to_string(),
                 //
                 tags_json,
-                palette_json
-            ],
+                palette_json,
+            ),
         )
-        .expect("Failed to insert image");
-    });
+        .await?;
+    }
 
     Ok(())
 }

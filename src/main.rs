@@ -11,7 +11,8 @@ struct Args {
     folder_path: String,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let args = Args::parse();
 
     if !fs::exists(&args.folder_path).unwrap_or(false) {
@@ -23,7 +24,7 @@ fn main() -> Result<()> {
 
     let db_path = PathBuf::from(&args.folder_path).join(DB_PATH);
 
-    db::write(db_path, indexed_images)?;
+    db::write(db_path, indexed_images).await?;
 
     Ok(())
 }
