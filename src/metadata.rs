@@ -1,0 +1,63 @@
+use std::path::Path;
+
+use anyhow::Result;
+use xmpkit::{XmpFile, XmpOptions, XmpValue, core::namespace::ns};
+
+#[derive(Debug, Default)]
+pub struct Metadata {
+    pub rating: u8,
+    pub description: String,
+    pub tags: Vec<String>,
+}
+
+pub fn read(path: &Path) -> Result<Metadata> {
+    let mut file = XmpFile::new();
+    file.open(path)?;
+
+    let mut meta = Metadata::default();
+
+    if let Some(xmp) = file.get_xmp() {
+        if let Some(rating) = xmp.get_property(ns::XMP, "Rating") {
+            meta.rating = rating.as_int().unwrap_or_default() as u8;
+        }
+        if let Some(description) = xmp.get_property(ns::DC, "description") {
+            meta.description = description.as_str().unwrap_or_default().to_string();
+        }
+        if let Some(tags) = xmp.get_property(ns::DC, "subject") {
+            match tags {
+                xmpkit::XmpValue::Array(tags) => {
+                    meta.tags = tags
+                        .iter()
+                        .filter_map(|t| t.as_str())
+                        .map(|t| t.to_string())
+                        .collect();
+                }
+                _ => {}
+            }
+        }
+    } else {
+        println!("No XMP metadata in {path:?}");
+    }
+
+    Ok(meta)
+}
+
+pub fn write(path: &Path, meta: &Metadata) -> Result<()> {
+    let mut file = XmpFile::new();
+    file.open_with(path, XmpOptions::default().for_update())?;
+
+    let mut xmp = file.get_xmp().cloned().unwrap_or_default();
+
+    xmp.set_property(ns::XMP, "Rating", (meta.rating as i64).into())?;
+    xmp.set_property(ns::DC, "description", meta.description.clone().into())?;
+    xmp.set_property(
+        ns::DC,
+        "subject",
+        XmpValue::Array(meta.tags.clone().into_iter().map(Into::into).collect()),
+    )?;
+
+    file.put_xmp(xmp);
+    file.save(path)?;
+
+    Ok(())
+}
