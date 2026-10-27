@@ -2,6 +2,7 @@ use std::{
     fs,
     path::{Path, PathBuf},
     process::exit,
+    time::Instant,
 };
 
 use anyhow::Result;
@@ -24,11 +25,19 @@ async fn main() -> Result<()> {
         exit(1);
     }
 
+    let start = Instant::now();
+
     let indexed_images = index_folder(Path::new(&args.folder_path))?;
-
     let db_path = PathBuf::from(&args.folder_path).join(DB_PATH);
-
     db::write(&db_path, &indexed_images).await?;
+
+    let duration = start.elapsed();
+
+    println!(
+        "Indexed {} images in {} seconds",
+        indexed_images.len(),
+        duration.as_secs_f32()
+    );
 
     Ok(())
 }

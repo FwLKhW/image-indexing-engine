@@ -15,7 +15,7 @@ fn main() -> anyhow::Result<()> {
         .to_str()
         .unwrap_or_default();
 
-    let hash_result = hash_image(img.to_rgba16().as_bytes(), format);
+    let hash_result = hash_image(img.to_rgba16().as_bytes());
 
     println!("{hash_result}");
 
