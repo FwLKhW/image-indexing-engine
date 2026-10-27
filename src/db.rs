@@ -9,7 +9,8 @@ pub async fn write(db_path: &Path, indexed_images: Vec<IndexedImage>) -> Result<
         .to_str()
         .ok_or_else(|| anyhow::anyhow!("invalid DB path"))?;
     let db = turso::Builder::new_local(path_str).build().await?;
-    let conn = db.connect()?;
+
+    let mut conn = db.connect()?;
 
     conn.execute_batch(
         r"DROP TABLE IF EXISTS images;
@@ -30,13 +31,16 @@ pub async fn write(db_path: &Path, indexed_images: Vec<IndexedImage>) -> Result<
         );",
     ).await?;
 
+    let tx = conn.transaction().await?;
+
+
     for img in indexed_images {
         let tags_json = serde_json::to_string(&img.tags).expect("Failed to serialize tags");
 
         let palette_json =
             serde_json::to_string(&img.palette).expect("Failed to serialize palette");
 
-        conn.execute(
+        tx.execute(
             r#"
             INSERT INTO images
             VALUES (
@@ -68,6 +72,8 @@ pub async fn write(db_path: &Path, indexed_images: Vec<IndexedImage>) -> Result<
         )
         .await?;
     }
+
+    tx.commit().await?;
 
     Ok(())
 }
