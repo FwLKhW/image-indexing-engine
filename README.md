@@ -1,14 +1,17 @@
 # Image Indexing Engine
 
+> [!WARNING]
+> Incremental indexing WIP!
+
 ### Usage
 
 ```sh
-image-indexing-engine "home/david/Pictures/girlfriend/"
+image-indexing-engine "~/Pictures/girlfriend/" --thumbnail --index --palette
 ```
 
 ### Output
 
-Under `home/david/Pictures/girlfriend/`:
+Under `~/Pictures/girlfriend/`:
 
 ```sh
 .eyeris/
@@ -16,7 +19,7 @@ Under `home/david/Pictures/girlfriend/`:
 │   ├── 1dn32hf...rbs.png
 │   ├── j5f49hf...asd.png
 │   └── ...
-└── images.db               # basic info, system metadata and some metadata standards.
+└── images.db               # basic info, metadatas and computed data like hash, colors...
 ```
 
 ### Project Structure
@@ -29,6 +32,7 @@ src/
 ├── db.rs             # db operations
 ├── hash.rs           # create unique identity for image using pixels + format
 ├── index.rs          # indexing pipeline include thumbnailing
+├── metadata.rs       # read metadata (rating, tags, description)
 ├── paths.rs
 ├── scan.rs           # scan images recursively
 └── thumbnail.rs      # resize 512-bound
