@@ -9,7 +9,7 @@ use image::EncodableLayout;
 use path_slash::PathExt;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{color::extract_palette, hash::hash_image_bytes, scan::scan_images};
+use crate::{color::extract_palette, hash::hash_image_bytes, metadata, scan::scan_images};
 
 #[derive(Debug)]
 pub struct IndexedImage {
@@ -21,7 +21,7 @@ pub struct IndexedImage {
     pub height: u32,
     pub created: u64,
     pub modified: u64,
-    pub rating: u32,
+    pub rating: u8,
     pub description: String,
     pub tags: Vec<String>,
     pub hash: String,
@@ -33,7 +33,8 @@ pub fn indexing_image(img_path: &Path, root: &Path, palette: bool) -> Result<Ind
     let rgb8_img = img.to_rgb8();
     let rgba16_img = img.to_rgba16();
 
-    let metadata = fs::metadata(img_path)?;
+    let sys_meta = fs::metadata(img_path)?;
+    let ext_meta = metadata::read(img_path)?;
 
     let rel_path = img_path.strip_prefix(root)?.to_slash_lossy().to_string();
     let name = img_path
@@ -48,14 +49,14 @@ pub fn indexing_image(img_path: &Path, root: &Path, palette: bool) -> Result<Ind
         .to_str()
         .unwrap_or_default()
         .to_uppercase();
-    let size = metadata.len();
-    let created = metadata
+    let size = sys_meta.len();
+    let created = sys_meta
         .created()
         .unwrap_or(SystemTime::now())
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis() as u64;
-    let modified = metadata
+    let modified = sys_meta
         .modified()
         .unwrap_or(SystemTime::now())
         .duration_since(UNIX_EPOCH)
@@ -71,9 +72,9 @@ pub fn indexing_image(img_path: &Path, root: &Path, palette: bool) -> Result<Ind
         height: img.height(),
         created,
         modified,
-        rating: 0,
-        description: "".into(),
-        tags: vec![],
+        rating: ext_meta.rating,
+        description: ext_meta.description,
+        tags: ext_meta.tags,
         hash: hash_image_bytes(rgba16_img.as_bytes()),
         palette: if palette {
             extract_palette(&rgb8_img).unwrap_or_default()
