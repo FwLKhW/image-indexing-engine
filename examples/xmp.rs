@@ -24,6 +24,10 @@ fn main() -> Result<()> {
 
     file.put_xmp(meta);
     file.save(&args[1])?;
+    file.close();
+
+    let mut file = XmpFile::new();
+    file.open(&args[1])?;
 
     if let Some(meta) = file.get_xmp() {
         println!("{:#?}", meta);
