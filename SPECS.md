@@ -38,7 +38,7 @@ src/
 
 ```sql
 CREATE TABLE IF NOT EXISTS images (
-    hash        TEXT        PRIMARY KEY,            -- 1.  blake3 hash of pixels + format
+    hash        TEXT        PRIMARY KEY,            -- 1.  blake3 hash of rgb8 pixels value
     path        TEXT        NOT NULL,               -- 2.  rel_path/to/image.png
     name        TEXT        NOT NULL,               -- 3.  image
     format      TEXT        NOT NULL,               -- 4.  PNG, JPG, WEBP
