@@ -35,8 +35,6 @@ pub fn read(path: &Path) -> Result<Metadata> {
                 _ => {}
             }
         }
-    } else {
-        println!("No XMP metadata in {path:?}");
     }
 
     Ok(meta)
