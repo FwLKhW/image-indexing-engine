@@ -5,7 +5,7 @@ use dirwalk::WalkBuilder;
 
 pub fn scan_images(path: &Path) -> Result<Vec<PathBuf>> {
     let result = WalkBuilder::new(path)
-        .extensions(["jpg", "jpeg", "png", "webp", "gif", "avif", "bmp", "ico"])
+        .extensions(["jpg", "jpeg", "png", "webp", "bmp", "ico"])
         .dirs_first(true)
         .build()
         .unwrap();
