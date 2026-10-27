@@ -1,13 +1,13 @@
 use std::{path::Path, time::Instant};
 
+use anyhow::Result;
 use image_indexing_engine::{
     db,
     index::indexing_folder,
     paths::{DB_REL_PATH, prepare_dot_folder},
 };
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let root = Path::new(&args[1]);
 
@@ -17,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
     let indexed_images = indexing_folder(root, true)?;
 
     let db_path = root.join(DB_REL_PATH);
-    db::write(&db_path, &indexed_images).await?;
+    db::write(&db_path, &indexed_images)?;
 
     println!("Take {} seconds", start.elapsed().as_secs_f32());
 

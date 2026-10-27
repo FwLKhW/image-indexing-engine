@@ -1,8 +1,9 @@
 use std::path::Path;
 
+use anyhow::Result;
 use image_indexing_engine::index::indexing_image;
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let img_path = Path::new(&args[1]);
 

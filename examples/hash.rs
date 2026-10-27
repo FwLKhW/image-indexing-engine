@@ -1,8 +1,9 @@
+use anyhow::Result;
 use image::EncodableLayout;
 
 use image_indexing_engine::hash::hash_image_bytes;
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
     let img = image::open(&args[1])?;

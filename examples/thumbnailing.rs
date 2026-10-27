@@ -1,8 +1,9 @@
 use std::{path::Path, time::Instant};
 
+use anyhow::Result;
 use image_indexing_engine::{paths::prepare_dot_folder, thumbnail::thumbnailing_folder};
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let root = Path::new(&args[1]);
 
