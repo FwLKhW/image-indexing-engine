@@ -4,7 +4,10 @@ use anyhow::{Result, bail};
 use clap::Parser;
 
 use image_indexing_engine::{
-    db, index::indexing_folder, paths::DB_REL_PATH, thumbnail::thumbnailing_folder,
+    db,
+    index::indexing_folder,
+    paths::{DB_REL_PATH, prepare_dot_folder},
+    thumbnail::thumbnailing_folder,
 };
 
 #[derive(Parser, Debug)]
@@ -20,10 +23,6 @@ struct Args {
     /// Enable indexing
     #[arg(short, long, default_value_t = false)]
     index: bool,
-
-    /// Enable calculate pixels hash (indexing)
-    #[arg(long, default_value_t = false)]
-    hash: bool,
 
     /// Enable dominant colors extraction (indexing)
     #[arg(short, long, default_value_t = false)]
