@@ -7,6 +7,7 @@ use std::{
 
 use anyhow::{Context, Ok, Result};
 use image::{DynamicImage, EncodableLayout};
+use path_slash::PathExt;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use smol_str::SmolStr;
 
@@ -52,7 +53,7 @@ pub fn index_image(img_path: &Path, img: &DynamicImage, root: &Path) -> Result<I
 
     Ok(IndexedImage {
         hash: hash_image(rgba16_img.as_bytes(), format, size),
-        path: rel_path.to_string_lossy().into(),
+        path: rel_path.to_slash_lossy().into(),
         name: img_path
             .file_stem()
             .unwrap_or_default()
@@ -111,8 +112,10 @@ pub fn index_folder(root: &Path) -> Result<Vec<IndexedImage>> {
 
     println!("Found {} images.", total_images);
 
-    remove_dir_all(root.join(DOT_FOLDER))
-        .context("failed remove dot folder, maybe used by another program")?;
+    let dot_folder_path = root.join(DOT_FOLDER);
+    remove_dir_all(&dot_folder_path).with_context(|| {
+        format!("failed remove {dot_folder_path:?}, maybe used by another program")
+    })?;
 
     let thumb_path = root.join(THUMBNAILS_PATH);
     create_dir_all(&thumb_path)?;

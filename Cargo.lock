@@ -1497,6 +1497,7 @@ dependencies = [
  "image",
  "oklab",
  "okmain",
+ "path-slash",
  "rayon",
  "rgb",
  "serde_json",
@@ -2154,6 +2155,12 @@ name = "pastey"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2ee67f1008b1ba2321834326597b8e186293b049a023cdef258527550b9935b4"
+
+[[package]]
+name = "path-slash"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e91099d4268b0e11973f036e885d652fb0b21fedcf69738c627f94db6a44f42"
 
 [[package]]
 name = "pin-project-lite"
