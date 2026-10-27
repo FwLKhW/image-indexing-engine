@@ -123,11 +123,12 @@ pub fn index_folder(root: &Path) -> Result<Vec<IndexedImage>> {
 
     println!("Indexing {} images...", total_images);
 
-    let indexed_images = image_paths
+    let results: Vec<Result<IndexedImage>> = image_paths
         .par_iter()
-        .map(|p| index_and_thumbnail(p, root, &thumb_path));
+        .map(|p| index_and_thumbnail(p, root, &thumb_path))
+        .collect();
 
-    let err_count = indexed_images.clone().filter(|i| i.is_err()).count();
+    let err_count = results.iter().filter(|i| i.is_err()).count();
 
     println!(
         "Indexed {}/{} images.",
@@ -136,14 +137,15 @@ pub fn index_folder(root: &Path) -> Result<Vec<IndexedImage>> {
     );
 
     if err_count < 100 {
-        indexed_images.clone().for_each(|i| {
+        results.iter().for_each(|i| {
             if i.is_err() {
                 println!("{i:?}")
             }
         });
     }
 
-    let success_indexed_images: Vec<IndexedImage> = indexed_images.filter_map(|i| i.ok()).collect();
+    let success_indexed_images: Vec<IndexedImage> =
+        results.into_iter().filter_map(|i| i.ok()).collect();
 
     Ok(success_indexed_images)
 }
