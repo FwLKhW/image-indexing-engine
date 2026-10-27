@@ -1,14 +1,13 @@
-use image_indexing_engine::thumbnail::generate_thumbnail_from_path;
+use std::path::Path;
+
+use image_indexing_engine::{paths::clean_dot_folder, thumbnail::thumbnailing_folder};
 
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = std::env::args().collect();
+    let root = Path::new(&args[1]);
 
-    let thumbnail = generate_thumbnail_from_path(&args[1]);
-
-    if let Ok(thumbnail) = thumbnail {
-        println!("Save thumbnail");
-        thumbnail.save("fixtures/thumbnail.png")?;
-    }
+    clean_dot_folder(&root)?;
+    thumbnailing_folder(&root)?;
 
     Ok(())
 }
