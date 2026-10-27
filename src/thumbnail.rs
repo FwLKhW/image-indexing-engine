@@ -44,11 +44,11 @@ pub fn thumbnailing_folder(root: &Path) -> Result<()> {
 
     let err_count = results.iter().filter(|i| i.is_err()).count();
     println!("{}/{} done", total_images - err_count, total_images);
-    results.iter().take(10).for_each(|result| {
-        if let Err(err) = result {
-            eprintln!("\n{:#}", err);
-        }
-    });
+    results
+        .iter()
+        .filter_map(|result| result.as_ref().err())
+        .take(10)
+        .for_each(|err| eprintln!("\n{err:#}"));
 
     Ok(())
 }

@@ -98,11 +98,11 @@ pub fn indexing_folder(root: &Path, palette: bool) -> Result<Vec<IndexedImage>> 
     let err_count = results.iter().filter(|i| i.is_err()).count();
 
     println!("{}/{} done", total_images - err_count, total_images);
-    results.iter().take(10).for_each(|result| {
-        if let Err(err) = result {
-            eprintln!("\n{err:#}")
-        }
-    });
+    results
+        .iter()
+        .filter_map(|result| result.as_ref().err())
+        .take(10)
+        .for_each(|err| eprintln!("\n{err:#}"));
 
     let success_indexed_images: Vec<IndexedImage> =
         results.into_iter().filter_map(|i| i.ok()).collect();
