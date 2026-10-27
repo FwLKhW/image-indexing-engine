@@ -5,28 +5,30 @@ use anyhow::Result;
 use crate::index::IndexedImage;
 
 pub async fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>) -> Result<()> {
-    let db = turso::Builder::new_local(&db_path.as_ref().to_str().unwrap())
-        .build()
-        .await?;
+    let path_str = db_path
+        .as_ref()
+        .to_str()
+        .ok_or_else(|| anyhow::anyhow!("invalid DB path"))?;
+    let db = turso::Builder::new_local(path_str).build().await?;
     let conn = db.connect()?;
 
     conn.execute_batch(
         r"DROP TABLE IF EXISTS images;
         CREATE TABLE IF NOT EXISTS images (
-            hash        VARCHAR     PRIMARY KEY,            -- 1.  blake3 hash of pixels + format + size
-            path        VARCHAR     NOT NULL,               -- 2.  path/to/image.png
-            name        VARCHAR     NOT NULL,               -- 3.  image
-            format      VARCHAR     NOT NULL,               -- 4.  PNG, JPG, WEBP
-            size        UBIGINT     NOT NULL,               -- 5.  in bytes
-            width       UINTEGER    NOT NULL,               -- 6.  3840
-            height      UINTEGER    NOT NULL,               -- 7.  2160
-            created     BIGINT      NOT NULL,               -- 8.  1792552976580
-            modified    BIGINT      NOT NULL,               -- 9.  1792552976580
-            rating      INTEGER     DEFAULT 0,              -- 10.
-            description VARCHAR     DEFAULT '',             -- 11.
-            tags        VARCHAR[]   DEFAULT [],             -- 12.
-            palette     FLOAT[3][]  DEFAULT [],             -- 13. Array of Oklab
-        );",
+            hash        TEXT        PRIMARY KEY,            -- 1.  blake3 hash of pixels + format + size
+            path        TEXT        NOT NULL,               -- 2.  path/to/image.png
+            name        TEXT        NOT NULL,               -- 3.  image
+            format      TEXT        NOT NULL,               -- 4.  PNG, JPG, WEBP
+            size        INT         NOT NULL,               -- 5.  in bytes
+            width       INT         NOT NULL,               -- 6.  3840
+            height      INT         NOT NULL,               -- 7.  2160
+            created     INT         NOT NULL,               -- 8.  1792552976580
+            modified    INT         NOT NULL,               -- 9.  1792552976580
+            rating      INT         DEFAULT 0,              -- 10.
+            description TEXT        DEFAULT '',             -- 11.
+            tags        TEXT        DEFAULT '[]',             -- 12.
+            palette     TEXT        DEFAULT '[]'              -- 13. Array of Oklab
+        ) STRICT;",
     ).await?;
 
     for img in indexed_images {
@@ -42,10 +44,10 @@ pub async fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>
                 ?1, ?2, ?3, ?4,
                 ?5, ?6, ?7, ?8, ?9,
                 ?10, ?11,
-                CAST(?12 AS VARCHAR[]),
-                CAST(?13 AS FLOAT[3][])
-                )
-                "#,
+                ?12,
+                ?13
+            )
+            "#,
             (
                 img.hash.as_str(),
                 img.path.to_string(),
