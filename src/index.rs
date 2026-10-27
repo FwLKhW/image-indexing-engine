@@ -109,15 +109,19 @@ pub fn index_folder(root: &Path) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(root)?;
     let total_images = image_paths.len();
 
-    println!("Found {} images.", total_images);
-
     let dot_folder_path = root.join(DOT_FOLDER);
-    remove_dir_all(&dot_folder_path).with_context(|| {
-        format!("failed remove {dot_folder_path:?}, maybe used by another program")
-    })?;
+    if let std::result::Result::Ok(exist) = dot_folder_path.try_exists()
+        && exist
+    {
+        remove_dir_all(&dot_folder_path).with_context(|| {
+            format!("failed remove {dot_folder_path:?}, maybe used by another program")
+        })?;
+    }
 
     let thumb_path = root.join(THUMBNAILS_PATH);
     create_dir_all(&thumb_path)?;
+
+    println!("Indexing {} images...", total_images);
 
     let indexed_images = image_paths
         .par_iter()
