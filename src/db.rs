@@ -15,21 +15,22 @@ pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result
     conn.execute_batch(
         r"DROP TABLE IF EXISTS images;
         CREATE TABLE IF NOT EXISTS images (
-            hash        TEXT        PRIMARY KEY,            -- 1.  blake3 hash of pixels + format + size
-            path        TEXT        NOT NULL,               -- 2.  path/to/image.png
-            name        TEXT        NOT NULL,               -- 3.  image
-            format      TEXT        NOT NULL,               -- 4.  PNG, JPG, WEBP
-            size        INT         NOT NULL,               -- 5.  in bytes
-            width       INT         NOT NULL,               -- 6.  3840
-            height      INT         NOT NULL,               -- 7.  2160
-            created     INT         NOT NULL,               -- 8.  1792552976580
-            modified    INT         NOT NULL,               -- 9.  1792552976580
-            rating      INT         DEFAULT 0,              -- 10.
-            description TEXT        DEFAULT '',             -- 11.
-            tags        TEXT        DEFAULT '[]',           -- 12.
-            palette     TEXT        DEFAULT '[]'            -- 13. Array of Oklab
+            path        TEXT        PRIMARY KEY,
+            name        TEXT        NOT NULL,
+            format      TEXT        NOT NULL,
+            size        INT         NOT NULL,
+            width       INT         NOT NULL,
+            height      INT         NOT NULL,
+            created     INT         NOT NULL,
+            modified    INT         NOT NULL,
+            rating      INT         DEFAULT 0,
+            description TEXT        DEFAULT '',
+            tags        TEXT        DEFAULT '[]',
+            hash        TEXT        DEFAULT '',
+            palette     TEXT        DEFAULT '[]'
         );",
-    ).await?;
+    )
+    .await?;
 
     let tx = conn.transaction().await?;
 
@@ -45,29 +46,31 @@ pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result
             r#"
             INSERT INTO images
             VALUES (
-                ?1, ?2, ?3, ?4,
-                ?5, ?6, ?7, ?8, ?9,
-                ?10, ?11,
-                ?12,
-                ?13
+                ?1,
+                ?2, ?3, ?4, ?5, ?6,
+                ?7, ?8,
+                ?9, ?10, ?11,
+                ?12, ?13
             )
             "#,
             (
-                img.hash.as_str(),
+                // id
                 img.path.to_string(),
+                // basic
                 img.name.to_string(),
                 img.format.to_string(),
-                //
                 img.size,
                 img.width,
                 img.height,
+                // system
                 img.created,
                 img.modified,
-                //
+                // extend
                 img.rating,
                 img.description.to_string(),
-                //
                 tags_json,
+                // custom
+                img.hash.as_str(),
                 palette_json,
             ),
         )
@@ -76,7 +79,7 @@ pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result
 
     tx.commit().await?;
 
-    println!("Saved {} records.", indexed_images.len());
+    println!("{} records written", indexed_images.len());
 
     Ok(())
 }

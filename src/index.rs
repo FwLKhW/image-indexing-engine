@@ -8,7 +8,6 @@ use anyhow::{Context, Ok, Result};
 use image::{DynamicImage, EncodableLayout};
 use path_slash::PathExt;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use smol_str::SmolStr;
 
 use crate::{
     color::extract_palette,
@@ -20,18 +19,18 @@ use crate::{
 
 #[derive(Debug)]
 pub struct IndexedImage {
-    pub hash: String,
-    pub path: SmolStr,
-    pub name: SmolStr,
-    pub format: SmolStr,
+    pub path: String,
+    pub name: String,
+    pub format: String,
     pub size: u64,
     pub width: u32,
     pub height: u32,
     pub created: u64,
     pub modified: u64,
     pub rating: u32,
-    pub description: SmolStr,
+    pub description: String,
     pub tags: Vec<String>,
+    pub hash: String,
     pub palette: Vec<[f32; 3]>,
 }
 
@@ -40,44 +39,47 @@ pub fn index_image(img_path: &Path, img: &DynamicImage, root: &Path) -> Result<I
     let rgba16_img = img.to_rgba16();
 
     let metadata = fs::metadata(img_path)?;
+
+    let rel_path = img_path.strip_prefix(root)?.to_slash_lossy().to_string();
+    let name = img_path
+        .file_stem()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default()
+        .to_string();
     let format = img_path
         .extension()
         .unwrap_or_default()
         .to_str()
-        .unwrap_or_default();
+        .unwrap_or_default()
+        .to_uppercase();
     let size = metadata.len();
-    let rel_path = img_path
-        .strip_prefix(root)
-        .with_context(|| format!("failed strip prefix {root:?} from {img_path:?}"))?;
+    let created = metadata
+        .created()
+        .unwrap_or(SystemTime::now())
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64;
+    let modified = metadata
+        .modified()
+        .unwrap_or(SystemTime::now())
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64;
 
     Ok(IndexedImage {
-        hash: hash_image(rgba16_img.as_bytes()),
-        path: rel_path.to_slash_lossy().into(),
-        name: img_path
-            .file_stem()
-            .unwrap_or_default()
-            .to_str()
-            .unwrap_or_default()
-            .into(),
-        format: format.into(),
+        path: rel_path,
+        name,
+        format,
         size,
         width: img.width(),
         height: img.height(),
-        created: metadata
-            .created()
-            .unwrap_or(SystemTime::now())
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis() as u64,
-        modified: metadata
-            .modified()
-            .unwrap_or(SystemTime::now())
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis() as u64,
+        created,
+        modified,
         rating: 0,
         description: "".into(),
         tags: vec![],
+        hash: hash_image(rgba16_img.as_bytes()),
         palette: extract_palette(&rgb8_img).unwrap_or_default(),
     })
 }
@@ -125,21 +127,24 @@ pub fn index_folder(root: &Path) -> Result<Vec<IndexedImage>> {
 
     let results: Vec<Result<IndexedImage>> = image_paths
         .par_iter()
-        .map(|p| index_and_thumbnail(p, root, &thumb_path))
+        .map(|img_path| index_and_thumbnail(img_path, root, &thumb_path))
         .collect();
 
     let err_count = results.iter().filter(|i| i.is_err()).count();
 
     println!(
-        "Indexed {}/{} images.",
-        total_images - err_count,
-        total_images
+        "{}",
+        if err_count == 0 {
+            "All images indexed".into()
+        } else {
+            format!("{} images failed", err_count)
+        }
     );
 
-    if err_count < 100 {
+    if err_count < 10 {
         results.iter().for_each(|i| {
             if i.is_err() {
-                println!("{i:?}")
+                println!("\n{i:?}\n")
             }
         });
     }
