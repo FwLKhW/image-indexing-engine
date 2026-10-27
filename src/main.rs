@@ -8,7 +8,7 @@ use std::{
 use anyhow::Result;
 use clap::Parser;
 
-use image_indexing_engine::{db, index::index_folder, paths::DB_PATH};
+use image_indexing_engine::{db, index::index_folder, paths::DB_REL_PATH};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     let start = Instant::now();
 
     let indexed_images = index_folder(Path::new(&args.folder_path))?;
-    let db_path = PathBuf::from(&args.folder_path).join(DB_PATH);
+    let db_path = PathBuf::from(&args.folder_path).join(DB_REL_PATH);
     db::write(&db_path, &indexed_images).await?;
 
     let duration = start.elapsed();

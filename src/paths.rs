@@ -4,8 +4,8 @@ use anyhow::{Context, Result};
 
 pub const DOT_FOLDER: &str = ".eyeris";
 
-pub const THUMBNAILS_PATH: &str = ".eyeris/thumbnails/";
-pub const DB_PATH: &str = ".eyeris/images.db";
+pub const THUMBNAILS_REL_PATH: &str = ".eyeris/thumbnails/";
+pub const DB_REL_PATH: &str = ".eyeris/images.db";
 
 pub fn clean_dot_folder(root: &Path) -> Result<()> {
     let dot_folder_path = root.join(DOT_FOLDER);
@@ -18,7 +18,7 @@ pub fn clean_dot_folder(root: &Path) -> Result<()> {
         })?;
     }
 
-    let thumb_path = root.join(THUMBNAILS_PATH);
+    let thumb_path = root.join(THUMBNAILS_REL_PATH);
     fs::create_dir_all(&thumb_path)?;
 
     Ok(())

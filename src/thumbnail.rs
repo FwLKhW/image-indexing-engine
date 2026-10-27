@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use image::{DynamicImage, imageops::FilterType};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{hash::hash_image, paths::THUMBNAILS_PATH, scan::scan_images};
+use crate::{hash::hash_image, paths::THUMBNAILS_REL_PATH, scan::scan_images};
 
 pub fn generate_thumbnail_from_path(path: &Path) -> Result<DynamicImage> {
     let img = image::open(path)?;
@@ -18,7 +18,6 @@ pub fn generate_thumbnail(img: &DynamicImage) -> DynamicImage {
 
 pub fn thumbnailing_image(img_path: &Path, thumb_path: &Path) -> Result<()> {
     let img = image::open(img_path).with_context(|| format!("failed open image {:?}", img_path))?;
-
     let thumbnail = generate_thumbnail(&img);
     let thumbnail_save_path = thumb_path.join(format!("{}.png", hash_image(&img)));
 
@@ -37,17 +36,14 @@ pub fn thumbnailing_folder(root: &Path) -> Result<()> {
     let total_images = image_paths.len();
 
     println!("Thumbnailing {} images...", total_images);
-
-    let thumb_path = root.join(THUMBNAILS_PATH);
+    let thumb_path = root.join(THUMBNAILS_REL_PATH);
     let results: Vec<Result<()>> = image_paths
         .par_iter()
         .map(|img_path| thumbnailing_image(img_path, &thumb_path))
         .collect();
 
     let err_count = results.iter().filter(|i| i.is_err()).count();
-
     println!("{}/{} done", total_images - err_count, total_images);
-
     results.iter().take(10).for_each(|result| {
         if let Err(err) = result {
             eprintln!("\n{:#}", err);
