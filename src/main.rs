@@ -29,8 +29,7 @@ struct Args {
     palette: bool,
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     let args = Args::parse();
 
     if !fs::exists(&args.folder_path).unwrap_or_default() {
@@ -48,7 +47,7 @@ async fn main() -> Result<()> {
     if args.index {
         prepare_dot_folder(&root, false, true)?;
         let indexed_images = indexing_folder(&root, args.palette)?;
-        db::write(&root.join(DB_REL_PATH), &indexed_images).await?;
+        db::write(&root.join(DB_REL_PATH), &indexed_images)?;
     }
     if args.thumbnail {
         prepare_dot_folder(&root, true, false)?;

@@ -1,16 +1,12 @@
 use std::path::Path;
 
 use anyhow::Result;
+use rusqlite::Connection;
 
 use crate::index::IndexedImage;
 
-pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result<()> {
-    let path_str = db_path
-        .to_str()
-        .ok_or_else(|| anyhow::anyhow!("invalid DB path"))?;
-    let db = turso::Builder::new_local(path_str).build().await?;
-
-    let mut conn = db.connect()?;
+pub fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result<()> {
+    let mut conn = Connection::open(db_path)?;
 
     conn.execute_batch(
         r"DROP TABLE IF EXISTS images;
@@ -29,10 +25,9 @@ pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result
             hash        TEXT        DEFAULT '',
             palette     TEXT        DEFAULT '[]'
         );",
-    )
-    .await?;
+    )?;
 
-    let tx = conn.transaction().await?;
+    let tx = conn.transaction()?;
 
     println!("Writing database...");
 
@@ -59,12 +54,12 @@ pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result
                 // basic
                 img.name.to_string(),
                 img.format.to_string(),
-                img.size,
+                img.size as i64,
                 img.width,
                 img.height,
                 // system
-                img.created,
-                img.modified,
+                img.created as i64,
+                img.modified as i64,
                 // extend
                 img.rating,
                 img.description.to_string(),
@@ -73,11 +68,10 @@ pub async fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result
                 img.hash.as_str(),
                 palette_json,
             ),
-        )
-        .await?;
+        )?;
     }
 
-    tx.commit().await?;
+    tx.commit()?;
 
     println!("{} records written", indexed_images.len());
 
