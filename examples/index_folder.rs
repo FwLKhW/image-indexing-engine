@@ -10,7 +10,7 @@ async fn main() -> anyhow::Result<()> {
     let indexed_images = index_folder(root)?;
 
     let db_path = root.join(DB_PATH);
-    db::write(db_path, indexed_images).await?;
+    db::write(&db_path, indexed_images).await?;
 
     Ok(())
 }

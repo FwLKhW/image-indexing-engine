@@ -4,9 +4,8 @@ use anyhow::Result;
 
 use crate::index::IndexedImage;
 
-pub async fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>) -> Result<()> {
+pub async fn write(db_path: &Path, indexed_images: Vec<IndexedImage>) -> Result<()> {
     let path_str = db_path
-        .as_ref()
         .to_str()
         .ok_or_else(|| anyhow::anyhow!("invalid DB path"))?;
     let db = turso::Builder::new_local(path_str).build().await?;
@@ -26,9 +25,9 @@ pub async fn write<P: AsRef<Path>>(db_path: P, indexed_images: Vec<IndexedImage>
             modified    INT         NOT NULL,               -- 9.  1792552976580
             rating      INT         DEFAULT 0,              -- 10.
             description TEXT        DEFAULT '',             -- 11.
-            tags        TEXT        DEFAULT '[]',             -- 12.
-            palette     TEXT        DEFAULT '[]'              -- 13. Array of Oklab
-        ) STRICT;",
+            tags        TEXT        DEFAULT '[]',           -- 12.
+            palette     TEXT        DEFAULT '[]'            -- 13. Array of Oklab
+        );",
     ).await?;
 
     for img in indexed_images {
