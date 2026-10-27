@@ -47,10 +47,12 @@ async fn main() -> Result<()> {
 
     let root = PathBuf::from(&args.folder_path);
     if args.index {
+        prepare_dot_folder(&root, false, true)?;
         let indexed_images = indexing_folder(&root)?;
         db::write(&root.join(DB_REL_PATH), &indexed_images).await?;
     }
     if args.thumbnail {
+        prepare_dot_folder(&root, true, false)?;
         thumbnailing_folder(&root)?;
     }
 
