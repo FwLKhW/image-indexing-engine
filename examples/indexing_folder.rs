@@ -14,7 +14,7 @@ async fn main() -> anyhow::Result<()> {
     let start = Instant::now();
 
     prepare_dot_folder(root, false, true)?;
-    let indexed_images = indexing_folder(root)?;
+    let indexed_images = indexing_folder(root, true)?;
 
     let db_path = root.join(DB_REL_PATH);
     db::write(&db_path, &indexed_images).await?;

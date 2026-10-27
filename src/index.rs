@@ -28,7 +28,7 @@ pub struct IndexedImage {
     pub palette: Vec<[f32; 3]>,
 }
 
-pub fn indexing_image(img_path: &Path, root: &Path) -> Result<IndexedImage> {
+pub fn indexing_image(img_path: &Path, root: &Path, palette: bool) -> Result<IndexedImage> {
     let img = image::open(img_path).with_context(|| format!("failed open image {:?}", img_path))?;
     let rgb8_img = img.to_rgb8();
     let rgba16_img = img.to_rgba16();
@@ -75,11 +75,15 @@ pub fn indexing_image(img_path: &Path, root: &Path) -> Result<IndexedImage> {
         description: "".into(),
         tags: vec![],
         hash: hash_image_bytes(rgba16_img.as_bytes()),
-        palette: extract_palette(&rgb8_img).unwrap_or_default(),
+        palette: if palette {
+            extract_palette(&rgb8_img).unwrap_or_default()
+        } else {
+            vec![]
+        },
     })
 }
 
-pub fn indexing_folder(root: &Path) -> Result<Vec<IndexedImage>> {
+pub fn indexing_folder(root: &Path, palette: bool) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(root)?;
     let total_images = image_paths.len();
 
@@ -87,7 +91,7 @@ pub fn indexing_folder(root: &Path) -> Result<Vec<IndexedImage>> {
 
     let results: Vec<Result<IndexedImage>> = image_paths
         .par_iter()
-        .map(|img_path| indexing_image(img_path, root))
+        .map(|img_path| indexing_image(img_path, root, palette))
         .collect();
 
     let err_count = results.iter().filter(|i| i.is_err()).count();

@@ -24,9 +24,9 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     index: bool,
 
-    /// Enable dominant colors extraction (indexing)
+    /// Enable color palette extraction (indexing)
     #[arg(short, long, default_value_t = false)]
-    color: bool,
+    palette: bool,
 }
 
 #[tokio::main]
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     let root = PathBuf::from(&args.folder_path);
     if args.index {
         prepare_dot_folder(&root, false, true)?;
-        let indexed_images = indexing_folder(&root)?;
+        let indexed_images = indexing_folder(&root, args.palette)?;
         db::write(&root.join(DB_REL_PATH), &indexed_images).await?;
     }
     if args.thumbnail {
