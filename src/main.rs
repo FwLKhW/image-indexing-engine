@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf, time::Instant};
+use std::{fs, path::PathBuf, process::exit, time::Instant};
 
 use anyhow::{Result, bail};
 use clap::Parser;
@@ -8,7 +8,7 @@ use image_indexing_engine::{
 };
 
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version, about = "An image indexing engine.")]
 struct Args {
     /// Target folder
     folder_path: String,
@@ -36,6 +36,11 @@ async fn main() -> Result<()> {
 
     if !fs::exists(&args.folder_path).unwrap_or_default() {
         bail!("\"{}\" is not exists or not accessible", args.folder_path);
+    }
+
+    if !args.thumbnail && !args.index {
+        println!("Do nothing :)");
+        exit(0);
     }
 
     let start = Instant::now();
