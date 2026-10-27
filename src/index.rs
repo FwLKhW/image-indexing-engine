@@ -79,7 +79,7 @@ pub fn indexing_image(img_path: &Path, root: &Path) -> Result<IndexedImage> {
     })
 }
 
-pub fn index_folder(root: &Path) -> Result<Vec<IndexedImage>> {
+pub fn indexing_folder(root: &Path) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(root)?;
     let total_images = image_paths.len();
 
