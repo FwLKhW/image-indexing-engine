@@ -52,7 +52,7 @@ pub fn index_image(img_path: &Path, img: &DynamicImage, root: &Path) -> Result<I
         .with_context(|| format!("failed strip prefix {root:?} from {img_path:?}"))?;
 
     Ok(IndexedImage {
-        hash: hash_image(rgba16_img.as_bytes(), format, size),
+        hash: hash_image(rgba16_img.as_bytes(), format),
         path: rel_path.to_slash_lossy().into(),
         name: img_path
             .file_stem()
