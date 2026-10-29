@@ -20,6 +20,7 @@ pub fn extract_colors(img: &DynamicImage) -> Result<Vec<Rgb<u8>>> {
     Ok(srgb_colors)
 }
 
+#[must_use]
 pub fn rgb2hex(rgb: &Rgb<u8>) -> String {
     format!("#{:02X}{:02X}{:02X}", rgb.r, rgb.g, rgb.b)
 }

@@ -34,7 +34,7 @@ pub fn write(csv_path: &Path, indexed_images: &[IndexedImage]) -> Result<()> {
     let default_color = String::new();
 
     for (id, img) in indexed_images.iter().enumerate() {
-        let colors_hex: Vec<String> = img.colors.iter().map(|c| rgb2hex(c)).collect();
+        let colors_hex: Vec<String> = img.colors.iter().map(rgb2hex).collect();
 
         wtr.write_record([
             &id.to_string(),
@@ -50,10 +50,10 @@ pub fn write(csv_path: &Path, indexed_images: &[IndexedImage]) -> Result<()> {
             &img.description,
             &img.tags.join("|"),
             &img.hash,
-            &colors_hex.get(0).unwrap_or(&default_color),
-            &colors_hex.get(1).unwrap_or(&default_color),
-            &colors_hex.get(2).unwrap_or(&default_color),
-            &colors_hex.get(3).unwrap_or(&default_color),
+            colors_hex.first().unwrap_or(&default_color),
+            colors_hex.get(1).unwrap_or(&default_color),
+            colors_hex.get(2).unwrap_or(&default_color),
+            colors_hex.get(3).unwrap_or(&default_color),
         ])?;
     }
 
