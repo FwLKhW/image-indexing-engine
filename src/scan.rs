@@ -35,13 +35,13 @@ pub fn scan_images(path: &Path) -> Result<Vec<PathBuf>> {
 
             if file_type.is_dir() {
                 stack.push(entry.path());
-            } else if file_type.is_file() {
-                if let Some(ext) = entry.path().extension().and_then(|e| e.to_str()) {
-                    let ext_lower = ext.to_ascii_lowercase();
-                    // TODO: fixed file exts seem not right
-                    if matches!(ext_lower.as_str(), "jpg" | "jpeg" | "png" | "webp") {
-                        images.push(entry.path());
-                    }
+            } else if file_type.is_file()
+                && let Some(ext) = entry.path().extension().and_then(|e| e.to_str())
+            {
+                let ext_lower = ext.to_ascii_lowercase();
+                // TODO: fixed file exts seem not right
+                if matches!(ext_lower.as_str(), "jpg" | "jpeg" | "png" | "webp") {
+                    images.push(entry.path());
                 }
             }
         }

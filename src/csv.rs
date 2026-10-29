@@ -5,12 +5,12 @@ use csv::Writer;
 
 use crate::index::IndexedImage;
 
-pub fn write(csv_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result<()> {
+pub fn write(csv_path: &Path, indexed_images: &[IndexedImage]) -> Result<()> {
     println!("Writing index.csv...");
 
     let mut wtr = Writer::from_path(csv_path)?;
 
-    wtr.write_record(&[
+    wtr.write_record([
         "id",
         "path",
         "name",
@@ -40,7 +40,7 @@ pub fn write(csv_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result<()> 
         let palette_json =
             serde_json::to_string(&img.palette).expect("Failed to serialize palette");
 
-        wtr.write_record(&[
+        wtr.write_record([
             &id,
             &img.path.to_string(),
             &img.name.to_string(),

@@ -23,17 +23,14 @@ pub fn read(path: &Path) -> Result<Metadata> {
         if let Some(description) = xmp.get_property(ns::DC, "description") {
             meta.description = description.as_str().unwrap_or_default().to_string();
         }
-        if let Some(tags) = xmp.get_property(ns::DC, "subject") {
-            match tags {
-                xmpkit::XmpValue::Array(tags) => {
-                    meta.tags = tags
-                        .iter()
-                        .filter_map(|t| t.as_str())
-                        .map(|t| t.to_string())
-                        .collect();
-                }
-                _ => {}
-            }
+        if let Some(tags) = xmp.get_property(ns::DC, "subject")
+            && let xmpkit::XmpValue::Array(tags) = tags
+        {
+            meta.tags = tags
+                .iter()
+                .filter_map(|t| t.as_str())
+                .map(|t| t.to_string())
+                .collect();
         }
     }
 
