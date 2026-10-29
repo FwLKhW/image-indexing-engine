@@ -5,7 +5,7 @@ use anyhow::{Context, Result, bail};
 pub const DOT_FOLDER: &str = ".eyeris";
 
 pub const THUMBNAILS_REL_PATH: &str = ".eyeris/thumbnails/";
-pub const DB_REL_PATH: &str = ".eyeris/images.db";
+pub const DB_REL_PATH: &str = ".eyeris/index.db";
 
 pub fn prepare_dot_folder(
     root: &Path,

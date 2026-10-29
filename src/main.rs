@@ -4,7 +4,7 @@ use anyhow::{Result, bail};
 use clap::Parser;
 
 use colored_text::Colorize;
-use image_indexing_engine::{
+use index::{
     db,
     index::indexing_folder,
     paths::{DB_REL_PATH, prepare_dot_folder},
@@ -25,7 +25,7 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     index: bool,
 
-    /// Enable color palette extraction (indexing)
+    /// Enable color palette extraction
     #[arg(short, long, default_value_t = false)]
     palette: bool,
 }

@@ -1,7 +1,7 @@
 use std::{path::Path, time::Instant};
 
 use anyhow::Result;
-use image_indexing_engine::{
+use index::{
     db,
     index::indexing_folder,
     paths::{DB_REL_PATH, prepare_dot_folder},

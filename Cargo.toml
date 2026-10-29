@@ -1,8 +1,9 @@
 [package]
-name = "image-indexing-engine"
+name = "index"
 version = "0.1.0"
 edition = "2024"
-default-run = "image-indexing-engine"
+desciption = "Image Indexing Engine"
+default-run = "index"
 
 [dependencies]
 anyhow = "1.0.104"

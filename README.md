@@ -6,7 +6,7 @@
 ### Usage
 
 ```sh
-image-indexing-engine "~/Pictures/girlfriend/" --thumbnail --index --palette
+index "~/Pictures/girlfriend/" -tip
 ```
 
 ### Output
@@ -19,7 +19,7 @@ Under `~/Pictures/girlfriend/`:
 │   ├── 1dn32hf...rbs.png
 │   ├── j5f49hf...asd.png
 │   └── ...
-└── images.db               # basic info, metadatas and computed data like hash, colors...
+└── index.db               # basic info, metadatas and computed data like hash, colors...
 ```
 
 ### Project Structure
@@ -40,23 +40,24 @@ src/
 
 ### Database Schema
 
-`images.db` contain single table `images`:
+`index.db` contain single table `images`:
 
 ```sql
 CREATE TABLE IF NOT EXISTS images (
-    path        TEXT        PRIMARY KEY,            -- rel_path/to/image.png
-    name        TEXT        NOT NULL,               -- image
-    format      TEXT        NOT NULL,               -- PNG, JPG, WEBP
-    size        INT         NOT NULL,               -- in bytes
-    width       INT         NOT NULL,               -- 3840
-    height      INT         NOT NULL,               -- 2160
-    created     INT         NOT NULL,               -- 1792552976580
-    modified    INT         NOT NULL,               -- 1792552976580
-    rating      INT         DEFAULT 0,              -- 0 to 5
-    description TEXT        DEFAULT '',             -- 'A beautiful girl ...'
-    tags        TEXT        DEFAULT '[]',           -- ['girl', 'beach', 'sunset']
-    hash        TEXT        DEFAULT '',             -- blake3 hash of rgb8 pixels value
-    palette     TEXT        DEFAULT '[]'            -- List of Oklab (3 floats)
+    id          INTEGER     PRIMARY KEY AUTOINCREMENT,
+    path        TEXT        NOT NULL UNIQUE,            -- rel_path/to/image.png
+    name        TEXT        NOT NULL,                   -- image
+    format      TEXT        NOT NULL,                   -- PNG, JPG, WEBP
+    size        INT         NOT NULL,                   -- in bytes
+    width       INT         NOT NULL,                   -- 3840
+    height      INT         NOT NULL,                   -- 2160
+    created     INT         NOT NULL,                   -- 1792552976580
+    modified    INT         NOT NULL,                   -- 1792552976580
+    rating      INT         DEFAULT 0,                  -- 0 to 5
+    description TEXT        DEFAULT '',                 -- 'A beautiful girl ...'
+    tags        TEXT        DEFAULT '[]',               -- ['girl', 'beach', 'sunset']
+    hash        TEXT        DEFAULT '',                 -- blake3 hash of rgba16 pixels value
+    palette     TEXT        DEFAULT '[]'                -- List of Oklab (3 floats)
 );
 ```
 

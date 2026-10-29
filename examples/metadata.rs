@@ -1,7 +1,7 @@
 use std::{path::Path, process::exit};
 
 use anyhow::Result;
-use image_indexing_engine::metadata::{self, Metadata};
+use index::metadata::{self, Metadata};
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();

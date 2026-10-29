@@ -11,7 +11,8 @@ pub fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result<()> {
     conn.execute_batch(
         r"DROP TABLE IF EXISTS images;
         CREATE TABLE IF NOT EXISTS images (
-            path        TEXT        PRIMARY KEY,
+            id          INTEGER     PRIMARY KEY AUTOINCREMENT,
+            path        TEXT        NOT NULL UNIQUE,
             name        TEXT        NOT NULL,
             format      TEXT        NOT NULL,
             size        INT         NOT NULL,
@@ -40,31 +41,32 @@ pub fn write(db_path: &Path, indexed_images: &Vec<IndexedImage>) -> Result<()> {
         tx.execute(
             r#"
             INSERT INTO images
+            (
+                path, name, format, size, width, height, created, modified,
+                rating, description, tags,
+                hash, palette
+            )
             VALUES (
-                ?1,
-                ?2, ?3, ?4, ?5, ?6,
-                ?7, ?8,
+                ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
                 ?9, ?10, ?11,
                 ?12, ?13
             )
             "#,
             (
-                // id
-                img.path.to_string(),
                 // basic
+                img.path.to_string(),
                 img.name.to_string(),
                 img.format.to_string(),
                 img.size as i64,
                 img.width,
                 img.height,
-                // system
                 img.created as i64,
                 img.modified as i64,
-                // extend
+                // metadata
                 img.rating,
                 img.description.to_string(),
                 tags_json,
-                // custom
+                // computed
                 img.hash.as_str(),
                 palette_json,
             ),

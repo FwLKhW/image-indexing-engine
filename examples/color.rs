@@ -1,7 +1,7 @@
 use anyhow::Result;
 use colored_text::Colorize;
 
-use image_indexing_engine::color::extract_palette_from_path;
+use index::color::extract_palette_from_path;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
