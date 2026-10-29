@@ -2,7 +2,7 @@
 name = "index"
 version = "0.1.0"
 edition = "2024"
-desciption = "Image Indexing Engine"
+description = "An image indexing engine"
 default-run = "index"
 
 [dependencies]
