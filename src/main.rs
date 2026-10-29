@@ -18,15 +18,19 @@ struct Args {
     folder_path: String,
 
     /// Enable generate thumbnails
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short = 't', long, default_value_t = false)]
     thumbnail: bool,
 
     /// Enable indexing
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short = 'i', long, default_value_t = false)]
     index: bool,
 
-    /// Enable color palette extraction
-    #[arg(short, long, default_value_t = false)]
+    /// Enable calculate pixels hash for duplicate detection
+    #[arg(short = 's', long, default_value_t = false)]
+    hash: bool,
+
+    /// Enable color palette extraction (dynamic 1 to 5 colors)
+    #[arg(short = 'p', long, default_value_t = false)]
     palette: bool,
 }
 
@@ -47,7 +51,7 @@ fn main() -> Result<()> {
     let root = PathBuf::from(&args.folder_path);
     if args.index {
         prepare_dot_folder(&root, false, true)?;
-        let indexed_images = indexing_folder(&root, args.palette)?;
+        let indexed_images = indexing_folder(&root, args.hash, args.palette)?;
         csv::write(&root.join(CSV_REL_PATH), &indexed_images)?;
         println!(
             "\nTake {} seconds\n",

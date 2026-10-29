@@ -8,7 +8,7 @@ fn main() -> Result<()> {
     let img_path = Path::new(&args[1]);
 
     let root = img_path.parent().unwrap();
-    let data = indexing_image(img_path, root, true)?;
+    let data = indexing_image(img_path, root, true, true)?;
 
     println!("{data:#?}");
 
