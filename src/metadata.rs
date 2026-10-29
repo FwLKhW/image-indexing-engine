@@ -23,7 +23,6 @@ pub fn read(path: &Path) -> Result<Metadata> {
 
     let mut meta = Metadata::default();
 
-    dbg!(file.get_xmp());
     if let Some(xmp) = file.get_xmp() {
         if let Some(rating) = xmp.get_property(ns::XMP, "Rating") {
             meta.rating = u8::try_from(rating.as_int().unwrap_or_default()).unwrap_or_default();
