@@ -14,7 +14,7 @@ fn main() -> Result<()> {
     let Some(root) = img_path.parent() else {
         bail!("failed get image parent folder");
     };
-    let data = indexing_image(img_path, root, true, true)?;
+    let data = indexing_image(img_path, root, true)?;
 
     println!("{data:#?}");
 

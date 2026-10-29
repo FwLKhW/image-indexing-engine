@@ -9,7 +9,7 @@ fn main() -> Result<()> {
     let Some(img_path) = args.get(1) else {
         bail!("require image path");
     };
-    let oklab_colors = extract_palette(&image::open(img_path)?.to_rgb8())?;
+    let oklab_colors = extract_palette(&image::open(img_path)?)?;
 
     println!("Dominant colors in Oklab:");
 

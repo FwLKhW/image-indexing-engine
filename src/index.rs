@@ -4,12 +4,11 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use anyhow::{Context, Ok, Result};
-use image::EncodableLayout;
+use anyhow::{Ok, Result};
 use path_slash::PathExt;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{color::extract_palette, hash::hash_image_bytes, metadata, scan::scan_images};
+use crate::{color::extract_palette, hash::hash_image, metadata, scan::scan_images};
 
 #[derive(Debug)]
 pub struct IndexedImage {
@@ -33,12 +32,7 @@ pub struct IndexedImage {
 /// Path does not exist.
 /// Image path isn't a child of root.
 /// Or failed reading system metadata and xmp metadata.
-pub fn indexing_image(
-    img_path: &Path,
-    root: &Path,
-    hash: bool,
-    palette: bool,
-) -> Result<IndexedImage> {
+pub fn indexing_image(img_path: &Path, root: &Path, extended: bool) -> Result<IndexedImage> {
     let rel_path = img_path.strip_prefix(root)?.to_slash_lossy().to_string();
     let name = img_path
         .file_stem()
@@ -72,39 +66,38 @@ pub fn indexing_image(
             .as_millis(),
     )?;
 
-    let img = image::open(img_path)
-        .with_context(|| format!("failed open image {}", img_path.display()))?;
+    let dimensions = imagesize::size(img_path)?;
     let ext_meta = metadata::read(img_path)?;
 
-    Ok(IndexedImage {
+    let mut indexed_image = IndexedImage {
         path: rel_path,
         name,
         format,
         size,
-        width: img.width(),
-        height: img.height(),
+        width: u32::try_from(dimensions.width)?,
+        height: u32::try_from(dimensions.height)?,
         created,
         modified,
         rating: ext_meta.rating,
         description: ext_meta.description,
         tags: ext_meta.tags,
-        hash: if hash {
-            hash_image_bytes(img.to_rgba16().as_bytes())
-        } else {
-            String::new()
-        },
-        palette: if palette {
-            extract_palette(&img.to_rgb8()).unwrap_or_default()
-        } else {
-            vec![]
-        },
-    })
+        hash: String::new(),
+        palette: vec![],
+    };
+
+    if extended {
+        let img = image::open(img_path)?;
+        indexed_image.hash = hash_image(&img);
+        indexed_image.palette = extract_palette(&img).unwrap_or_default();
+    }
+
+    Ok(indexed_image)
 }
 
 /// # Errors
 ///
 /// Path does not exists or image indexing failed.
-pub fn indexing_folder(root: &Path, hash: bool, palette: bool) -> Result<Vec<IndexedImage>> {
+pub fn indexing_folder(root: &Path, extended: bool) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(root);
     let total_images = image_paths.len();
 
@@ -112,7 +105,7 @@ pub fn indexing_folder(root: &Path, hash: bool, palette: bool) -> Result<Vec<Ind
 
     let results: Vec<Result<IndexedImage>> = image_paths
         .par_iter()
-        .map(|img_path| indexing_image(img_path, root, hash, palette))
+        .map(|img_path| indexing_image(img_path, root, extended))
         .collect();
 
     let err_count = results.iter().filter(|i| i.is_err()).count();

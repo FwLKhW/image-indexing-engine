@@ -22,17 +22,13 @@ struct Args {
     #[arg(short = 't', long, default_value_t = false)]
     thumbnail: bool,
 
-    /// Enable indexing
+    /// Enable basic indexing
     #[arg(short = 'i', long, default_value_t = false)]
     index: bool,
 
-    /// Enable calculate pixels hash for duplicate detection
-    #[arg(short = 's', long, default_value_t = false)]
-    hash: bool,
-
-    /// Enable color palette extraction (dynamic 1 to 5 colors)
-    #[arg(short = 'p', long, default_value_t = false)]
-    palette: bool,
+    /// Enable extended indexing (hash, palette)
+    #[arg(short = 'a', long, default_value_t = false)]
+    extended: bool,
 }
 
 fn main() -> Result<()> {
@@ -52,7 +48,7 @@ fn main() -> Result<()> {
     let root = PathBuf::from(&args.folder_path);
     if args.index {
         prepare_dot_folder(&root, false, true)?;
-        let indexed_images = indexing_folder(&root, args.hash, args.palette)?;
+        let indexed_images = indexing_folder(&root, args.extended)?;
         csv::write(&root.join(CSV_REL_PATH), &indexed_images)?;
         println!(
             "\nTake {} seconds\n",

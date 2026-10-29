@@ -18,7 +18,7 @@ fn main() -> Result<()> {
 
     let root = Path::new(path);
     prepare_dot_folder(root, false, true)?;
-    let indexed_images = indexing_folder(root, true, true)?;
+    let indexed_images = indexing_folder(root, true)?;
 
     let db_path = root.join(CSV_REL_PATH);
     csv::write(&db_path, &indexed_images)?;

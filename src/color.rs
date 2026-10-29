@@ -1,11 +1,12 @@
 use anyhow::Result;
-use image::{ImageBuffer, Rgb};
+use image::{DynamicImage, GenericImageView};
 
 /// # Errors
 ///
 /// The only case this will fail is width or height of the image bigger than 65536.
-pub fn extract_palette(rgb8_img: &ImageBuffer<Rgb<u8>, Vec<u8>>) -> Result<Vec<[f32; 3]>> {
-    let (width, height) = rgb8_img.dimensions();
+pub fn extract_palette(img: &DynamicImage) -> Result<Vec<[f32; 3]>> {
+    let (width, height) = img.dimensions();
+    let rgb8_img = img.to_rgb8();
 
     let input = okmain::InputImage::from_bytes(
         u16::try_from(width)?,
