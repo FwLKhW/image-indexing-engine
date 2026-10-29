@@ -1,6 +1,6 @@
 use std::{path::Path, time::Instant};
 
-use anyhow::{Result, bail};
+use anyhow::Result;
 use index::{
     csv,
     index::indexing_folder,
@@ -10,9 +10,8 @@ use index::{
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
-    let Some(path) = args.get(1) else {
-        bail!("require folder path");
-    };
+    let default_path = String::from("fixtures/imgs/");
+    let path = args.get(1).unwrap_or(&default_path);
 
     let start = Instant::now();
 
