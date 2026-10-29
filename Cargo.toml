@@ -1,9 +1,9 @@
 [package]
-name = "index"
+name = "iie"
 version = "0.2.0"
 edition = "2024"
 description = "An image indexing engine"
-default-run = "index"
+default-run = "iie"
 
 [dependencies]
 anyhow = "1.0.104"

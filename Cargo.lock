@@ -495,6 +495,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "iie"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "blake3",
+ "clap",
+ "colored_text",
+ "csv",
+ "image",
+ "imagesize",
+ "oklab",
+ "okmain",
+ "path-slash",
+ "rayon",
+ "rgb",
+ "xmpkit",
+]
+
+[[package]]
 name = "image"
 version = "0.25.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -534,25 +553,6 @@ name = "imgref"
 version = "1.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e44b0a4eaa4c82f441d50a963f2d5f05a787240aeee097597033e72accfd22f"
-
-[[package]]
-name = "index"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "blake3",
- "clap",
- "colored_text",
- "csv",
- "image",
- "imagesize",
- "oklab",
- "okmain",
- "path-slash",
- "rayon",
- "rgb",
- "xmpkit",
-]
 
 [[package]]
 name = "indexmap"
