@@ -13,7 +13,21 @@ use iie::{
 };
 
 #[derive(Parser, Debug)]
-#[command(version, about = "An image indexing engine.")]
+#[command(
+    version,
+    name = "iie",
+    about = "An image indexing engine.",
+    long_about = "\n
+    ███ ███ ███████ 
+     █   █  █       
+     █   █  █       
+     █   █  █████   
+     █   █  █       
+     █   █  █       
+    ███ ███ ███████ 
+
+An image indexing engine."
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
