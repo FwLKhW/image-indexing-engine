@@ -1,20 +1,18 @@
 use std::{path::Path, time::Instant};
 
-use anyhow::{Result, bail};
-use iie::{paths::prepare_dot_folder, thumbnail::thumbnailing_folder};
+use anyhow::Result;
+use iie::thumbnail::thumbnailing_folder;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
-    let Some(path) = args.get(1) else {
-        bail!("require folder path");
-    };
+    let default_folder_path = String::from("fixtures/imgs/");
+    let folder_path = args.get(1).unwrap_or(&default_folder_path);
+    let folder_path = Path::new(folder_path);
 
     let start = Instant::now();
 
-    let root = Path::new(path);
-    prepare_dot_folder(root, true, false)?;
-    thumbnailing_folder(root)?;
+    thumbnailing_folder(folder_path)?;
 
     println!("Take {} seconds", start.elapsed().as_secs_f32());
 

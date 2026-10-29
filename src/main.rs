@@ -8,7 +8,7 @@ use iie::{
     csv,
     index::indexing_folder,
     metadata::{self, MetadataWriteAction},
-    paths::{CSV_REL_PATH, prepare_dot_folder},
+    paths::{CSV_REL_PATH},
     thumbnail::thumbnailing_folder,
 };
 
@@ -83,8 +83,6 @@ fn main() -> Result<()> {
     match &cli.command {
         Commands::Thumb { folder_path } => {
             let folder_path = PathBuf::from(folder_path);
-
-            prepare_dot_folder(&folder_path, true, false)?;
             thumbnailing_folder(&folder_path)?;
         }
         Commands::Index {
@@ -92,8 +90,6 @@ fn main() -> Result<()> {
             extended,
         } => {
             let folder_path = PathBuf::from(folder_path);
-
-            prepare_dot_folder(&folder_path, false, true)?;
             let indexed_images = indexing_folder(&folder_path, *extended)?;
             csv::write(&folder_path.join(CSV_REL_PATH), &indexed_images)?;
         }
