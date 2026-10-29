@@ -5,7 +5,7 @@ use anyhow::{Context, Result, bail};
 pub const DOT_FOLDER: &str = ".eyeris";
 
 pub const THUMBNAILS_REL_PATH: &str = ".eyeris/thumbnails/";
-pub const DB_REL_PATH: &str = ".eyeris/index.db";
+pub const CSV_REL_PATH: &str = ".eyeris/index.csv";
 
 pub fn prepare_dot_folder(
     root: &Path,
@@ -18,7 +18,7 @@ pub fn prepare_dot_folder(
 
     let dot_folder_path = root.join(DOT_FOLDER);
     let thumbnails_path = root.join(THUMBNAILS_REL_PATH);
-    let db_path = root.join(DB_REL_PATH);
+    let db_path = root.join(CSV_REL_PATH);
 
     if delete_thumbnails && thumbnails_path.try_exists().unwrap_or_default() {
         fs::remove_dir_all(&thumbnails_path).context("failed remove thumbnails folder")?;

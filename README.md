@@ -19,7 +19,7 @@ Under `~/Pictures/girlfriend/`:
 │   ├── 1dn32hf...rbs.png
 │   ├── j5f49hf...asd.png
 │   └── ...
-└── index.db               # basic info, metadatas and computed data like hash, colors...
+└── index.csv               # basic info, metadatas and computed data like hash, colors...
 ```
 
 ### Project Structure
@@ -29,7 +29,7 @@ src/
 ├── main.rs           # CLI
 ├── lib.rs
 ├── color.rs          # dominant colors extraction
-├── db.rs             # db operations
+├── csv.rs            # CSV export operations
 ├── hash.rs           # create unique identity for image using pixels + format
 ├── index.rs          # indexing pipeline include thumbnailing
 ├── metadata.rs       # read metadata (rating, tags, description)
@@ -38,28 +38,26 @@ src/
 └── thumbnail.rs      # resize 512-bound
 ```
 
-### Database Schema
+### CSV Schema
 
-`index.db` contain single table `images`:
+The generated `index.csv` contains columns for direct analysis in Python Pandas:
 
-```sql
-CREATE TABLE IF NOT EXISTS images (
-    id          INTEGER     PRIMARY KEY AUTOINCREMENT,
-    path        TEXT        NOT NULL UNIQUE,            -- rel_path/to/image.png
-    name        TEXT        NOT NULL,                   -- image
-    format      TEXT        NOT NULL,                   -- PNG, JPG, WEBP
-    size        INT         NOT NULL,                   -- in bytes
-    width       INT         NOT NULL,                   -- 3840
-    height      INT         NOT NULL,                   -- 2160
-    created     INT         NOT NULL,                   -- 1792552976580
-    modified    INT         NOT NULL,                   -- 1792552976580
-    rating      INT         DEFAULT 0,                  -- 0 to 5
-    description TEXT        DEFAULT '',                 -- 'A beautiful girl ...'
-    tags        TEXT        DEFAULT '[]',               -- ['girl', 'beach', 'sunset']
-    hash        TEXT        DEFAULT '',                 -- blake3 hash of rgba16 pixels value
-    palette     TEXT        DEFAULT '[]'                -- List of Oklab (3 floats)
-);
-```
+| Column      | Type        | Description                                                | Example                                                                                                               |
+| ----------- | ----------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| id          | Integer     | Auto-incrementing (1-indexed)                              | 42                                                                                                                    |
+| path        | String      | Relative path to image                                     | "rel_path/to/image.png"                                                                                               |
+| name        | String      | Image name                                                 | "image"                                                                                                               |
+| format      | String      | Image format (PNG, JPG, WEBP)                              | "PNG"                                                                                                                 |
+| size        | Integer     | File size in bytes                                         | 2478406                                                                                                               |
+| width       | Integer     | Image width in pixels                                      | 3840                                                                                                                  |
+| height      | Integer     | Image height in pixels                                     | 2160                                                                                                                  |
+| created     | Integer     | Creation timestamp (ms)                                    | 1792321201                                                                                                            |
+| modified    | Integer     | Modification timestamp (ms)                                | 1792321201                                                                                                            |
+| rating      | Integer     | User rating (0 to 5)                                       | 3                                                                                                                     |
+| description | String      | Image description                                          | "A random image"                                                                                                      |
+| tags        | JSON String | List of tags                                               | "['girl', 'beach', 'sunset']                                                                                          |
+| hash        | String      | BLAKE3 hash of rgba16 pixel values                         | "35872f721295a1aff5c658ee82f046f0523b96919b2f9859f418b56d35422684"                                                    |
+| palette     | JSON String | List of dominant colors in Oklab format ([[l, a, b], ...]) | "[[0.23075044,2.7358425e-8,4.370804e-9],[0.60934067,0.020011054,0.023310097],[0.83049333,-0.0034050737,0.018965157]]" |
 
 ### Supported Image Formats
 

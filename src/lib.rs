@@ -1,5 +1,5 @@
 pub mod color;
-pub mod db;
+pub mod csv;
 pub mod hash;
 pub mod index;
 pub mod metadata;

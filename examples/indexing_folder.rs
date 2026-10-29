@@ -2,9 +2,9 @@ use std::{path::Path, time::Instant};
 
 use anyhow::Result;
 use index::{
-    db,
+    csv,
     index::indexing_folder,
-    paths::{DB_REL_PATH, prepare_dot_folder},
+    paths::{CSV_REL_PATH, prepare_dot_folder},
 };
 
 fn main() -> Result<()> {
@@ -16,8 +16,8 @@ fn main() -> Result<()> {
     prepare_dot_folder(root, false, true)?;
     let indexed_images = indexing_folder(root, true)?;
 
-    let db_path = root.join(DB_REL_PATH);
-    db::write(&db_path, &indexed_images)?;
+    let db_path = root.join(CSV_REL_PATH);
+    csv::write(&db_path, &indexed_images)?;
 
     println!("Take {} seconds", start.elapsed().as_secs_f32());
 

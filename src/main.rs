@@ -5,9 +5,9 @@ use clap::Parser;
 
 use colored_text::Colorize;
 use index::{
-    db,
+    csv,
     index::indexing_folder,
-    paths::{DB_REL_PATH, prepare_dot_folder},
+    paths::{CSV_REL_PATH, prepare_dot_folder},
     thumbnail::thumbnailing_folder,
 };
 
@@ -48,7 +48,7 @@ fn main() -> Result<()> {
     if args.index {
         prepare_dot_folder(&root, false, true)?;
         let indexed_images = indexing_folder(&root, args.palette)?;
-        db::write(&root.join(DB_REL_PATH), &indexed_images)?;
+        csv::write(&root.join(CSV_REL_PATH), &indexed_images)?;
         println!(
             "\nTake {} seconds\n",
             format!("{}", start.elapsed().as_secs_f32()).green()
