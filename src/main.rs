@@ -1,68 +1,108 @@
-use std::{fs, path::PathBuf, process::exit, time::Instant};
+use std::{path::PathBuf, time::Instant};
 
-use anyhow::{Result, bail};
-use clap::Parser;
+use anyhow::Result;
+use clap::{Parser, Subcommand};
 
 use colored_text::Colorize;
-use index::{
+use iie::{
     csv,
     index::indexing_folder,
+    metadata::{self, MetadataWriteAction},
     paths::{CSV_REL_PATH, prepare_dot_folder},
     thumbnail::thumbnailing_folder,
 };
 
 #[derive(Parser, Debug)]
 #[command(version, about = "An image indexing engine.")]
-#[allow(clippy::struct_excessive_bools)]
-struct Args {
-    /// Target folder
-    folder_path: String,
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
 
-    /// Enable generate thumbnails
-    #[arg(short = 't', long, default_value_t = false)]
-    thumbnail: bool,
+#[derive(Debug, Subcommand)]
+enum Commands {
+    /// Generate thumbnails
+    Thumb {
+        /// Target folder
+        #[arg(required = true)]
+        folder_path: String,
+    },
+    /// Indexing
+    Index {
+        /// Target folder
+        folder_path: String,
 
-    /// Enable basic indexing
-    #[arg(short = 'i', long, default_value_t = false)]
-    index: bool,
+        /// Enable extended indexing (hash, colors)
+        #[arg(short, long, default_value_t = false)]
+        extended: bool,
+    },
+    /// Write metadata to image
+    Write {
+        /// Image path
+        image_path: String,
 
-    /// Enable extended indexing (hash, palette)
-    #[arg(short = 'e', long, default_value_t = false)]
-    extended: bool,
+        #[command(subcommand)]
+        command: WriteCommands,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+enum WriteCommands {
+    /// Set rating
+    Rating {
+        /// Rating value to be writen (0 to 5)
+        value: u8,
+    },
+
+    /// Add or remove tag
+    Tag {
+        /// Tag to add or remove. If not exist, add. Otherwise, remove.
+        tag: String,
+    },
 }
 
 fn main() -> Result<()> {
-    let args = Args::parse();
-
-    if !fs::exists(&args.folder_path).unwrap_or_default() {
-        bail!("\"{}\" is not exists or not accessible", args.folder_path);
-    }
-
-    if !args.thumbnail && !args.index {
-        println!("Do nothing :)");
-        exit(0);
-    }
+    let cli = Cli::parse();
 
     let start = Instant::now();
 
-    let root = PathBuf::from(&args.folder_path);
-    if args.index {
-        prepare_dot_folder(&root, false, true)?;
-        let indexed_images = indexing_folder(&root, args.extended)?;
-        csv::write(&root.join(CSV_REL_PATH), &indexed_images)?;
-        println!(
-            "\nTake {} seconds\n",
-            format!("{}", start.elapsed().as_secs_f32()).green()
-        );
+    match &cli.command {
+        Commands::Thumb { folder_path } => {
+            let folder_path = PathBuf::from(folder_path);
+
+            prepare_dot_folder(&folder_path, true, false)?;
+            thumbnailing_folder(&folder_path)?;
+        }
+        Commands::Index {
+            folder_path,
+            extended,
+        } => {
+            let folder_path = PathBuf::from(folder_path);
+
+            prepare_dot_folder(&folder_path, false, true)?;
+            let indexed_images = indexing_folder(&folder_path, *extended)?;
+            csv::write(&folder_path.join(CSV_REL_PATH), &indexed_images)?;
+        }
+        Commands::Write {
+            image_path,
+            command,
+        } => {
+            let img_path = PathBuf::from(image_path);
+            match command {
+                WriteCommands::Rating { value } => {
+                    metadata::write(&img_path, MetadataWriteAction::Rating(*value))?;
+                }
+                WriteCommands::Tag { tag } => {
+                    metadata::write(&img_path, MetadataWriteAction::Tagging(tag.clone()))?;
+                }
+            }
+        }
     }
-    if args.thumbnail {
-        prepare_dot_folder(&root, true, false)?;
-        thumbnailing_folder(&root)?;
-        println!(
-            "\nTake {} seconds\n",
-            format!("{}", start.elapsed().as_secs_f32()).green()
-        );
-    }
+
+    println!(
+        "\nTake {} seconds\n",
+        format!("{}", start.elapsed().as_secs_f32()).green()
+    );
 
     Ok(())
 }
