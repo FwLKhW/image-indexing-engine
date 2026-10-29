@@ -1,10 +1,11 @@
 use anyhow::Result;
 use image::{DynamicImage, GenericImageView};
+use rgb::Rgb;
 
 /// # Errors
 ///
 /// The only case this will fail is width or height of the image bigger than 65536.
-pub fn extract_palette(img: &DynamicImage) -> Result<Vec<[f32; 3]>> {
+pub fn extract_colors(img: &DynamicImage) -> Result<Vec<Rgb<u8>>> {
     let (width, height) = img.dimensions();
     let rgb8_img = img.to_rgb8();
 
@@ -16,17 +17,9 @@ pub fn extract_palette(img: &DynamicImage) -> Result<Vec<[f32; 3]>> {
 
     let srgb_colors = okmain::colors(input);
 
-    let oklab_palette = srgb_colors
-        .into_iter()
-        .map(|c| {
-            let r = f32::from(c.r) / 255.0;
-            let g = f32::from(c.g) / 255.0;
-            let b = f32::from(c.b) / 255.0;
+    Ok(srgb_colors)
+}
 
-            let lab = oklab::srgb_f32_to_oklab(rgb::Rgb { r, g, b });
-            [lab.l, lab.a, lab.b]
-        })
-        .collect();
-
-    Ok(oklab_palette)
+pub fn rgb2hex(rgb: &Rgb<u8>) -> String {
+    format!("#{:02X}{:02X}{:02X}", rgb.r, rgb.g, rgb.b)
 }

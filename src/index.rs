@@ -7,8 +7,9 @@ use std::{
 use anyhow::{Ok, Result};
 use path_slash::PathExt;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rgb::Rgb;
 
-use crate::{color::extract_palette, hash::hash_image, metadata, scan::scan_images};
+use crate::{color::extract_colors, hash::hash_image, metadata, scan::scan_images};
 
 #[derive(Debug)]
 pub struct IndexedImage {
@@ -24,7 +25,7 @@ pub struct IndexedImage {
     pub description: String,
     pub tags: Vec<String>,
     pub hash: String,
-    pub palette: Vec<[f32; 3]>,
+    pub colors: Vec<Rgb<u8>>,
 }
 
 /// # Errors
@@ -82,13 +83,13 @@ pub fn indexing_image(img_path: &Path, root: &Path, extended: bool) -> Result<In
         description: ext_meta.description,
         tags: ext_meta.tags,
         hash: String::new(),
-        palette: vec![],
+        colors: vec![],
     };
 
     if extended {
         let img = image::open(img_path)?;
         indexed_image.hash = hash_image(&img);
-        indexed_image.palette = extract_palette(&img).unwrap_or_default();
+        indexed_image.colors = extract_colors(&img)?;
     }
 
     Ok(indexed_image)

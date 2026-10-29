@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use csv::Writer;
 
-use crate::index::IndexedImage;
+use crate::{color::rgb2hex, index::IndexedImage};
 
 /// # Errors
 ///
@@ -25,37 +25,35 @@ pub fn write(csv_path: &Path, indexed_images: &[IndexedImage]) -> Result<()> {
         "description",
         "tags",
         "hash",
-        "palette",
+        "color_1",
+        "color_2",
+        "color_3",
+        "color_4",
     ])?;
 
-    for (index, img) in indexed_images.iter().enumerate() {
-        let id = index.to_string();
-        let size_str = img.size.to_string();
-        let width_str = img.width.to_string();
-        let height_str = img.height.to_string();
-        let created_str = img.created.to_string();
-        let modified_str = img.modified.to_string();
-        let rating_str = img.rating.to_string();
+    let default_color = String::new();
 
-        let tags_json = serde_json::to_string(&img.tags).context("Failed to serialize tags")?;
-        let palette_json =
-            serde_json::to_string(&img.palette).context("Failed to serialize palette")?;
+    for (id, img) in indexed_images.iter().enumerate() {
+        let colors_hex: Vec<String> = img.colors.iter().map(|c| rgb2hex(c)).collect();
 
         wtr.write_record([
-            &id,
+            &id.to_string(),
             &img.path,
             &img.name,
             &img.format,
-            &size_str,
-            &width_str,
-            &height_str,
-            &created_str,
-            &modified_str,
-            &rating_str,
+            &img.size.to_string(),
+            &img.width.to_string(),
+            &img.height.to_string(),
+            &img.created.to_string(),
+            &img.modified.to_string(),
+            &img.rating.to_string(),
             &img.description,
-            &tags_json,
+            &img.tags.join("|"),
             &img.hash,
-            &palette_json,
+            &colors_hex.get(0).unwrap_or(&default_color),
+            &colors_hex.get(1).unwrap_or(&default_color),
+            &colors_hex.get(2).unwrap_or(&default_color),
+            &colors_hex.get(3).unwrap_or(&default_color),
         ])?;
     }
 
