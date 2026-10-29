@@ -1,6 +1,6 @@
 [package]
 name = "index"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "An image indexing engine"
 default-run = "index"
@@ -23,7 +23,6 @@ okmain = "0.2.0"
 path-slash = "0.2.1"
 rayon = "1.12.0"
 rgb = { version = "0.8.53", features = ["as-bytes"], default-features = false }
-serde_json = "1.0.154"
 xmpkit = { version = "0.1.6", features = [
     "jpeg",
     "mutli-thread",
