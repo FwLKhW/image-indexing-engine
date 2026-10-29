@@ -59,3 +59,8 @@ CREATE TABLE IF NOT EXISTS images (
     palette     TEXT        DEFAULT '[]'            -- List of Oklab (3 floats)
 );
 ```
+
+### Supported Image Formats
+
+| `PNG` | `JPG` | `WEBP` |
+| ----- | ----- | ------ |
