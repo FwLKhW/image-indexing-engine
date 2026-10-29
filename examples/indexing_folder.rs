@@ -1,7 +1,7 @@
 use std::{path::Path, time::Instant};
 
 use anyhow::Result;
-use index::{
+use iie::{
     csv,
     index::indexing_folder,
     paths::{CSV_REL_PATH, prepare_dot_folder},

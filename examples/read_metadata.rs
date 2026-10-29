@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Result;
-use index::metadata;
+use iie::metadata;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();

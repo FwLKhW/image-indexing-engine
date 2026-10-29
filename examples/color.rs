@@ -1,7 +1,7 @@
 use anyhow::Result;
 use colored_text::Colorize;
 
-use index::color::{extract_colors, rgb2hex};
+use iie::color::{extract_colors, rgb2hex};
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();

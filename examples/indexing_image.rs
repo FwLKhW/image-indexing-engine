@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::{Result, bail};
-use index::index::indexing_image;
+use iie::index::indexing_image;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();

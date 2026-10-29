@@ -1,6 +1,6 @@
 use anyhow::{Result, bail};
 
-use index::hash::hash_image;
+use iie::hash::hash_image;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();

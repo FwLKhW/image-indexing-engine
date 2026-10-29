@@ -1,7 +1,7 @@
 use std::{path::Path, time::Instant};
 
 use anyhow::{Result, bail};
-use index::{paths::prepare_dot_folder, thumbnail::thumbnailing_folder};
+use iie::{paths::prepare_dot_folder, thumbnail::thumbnailing_folder};
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();

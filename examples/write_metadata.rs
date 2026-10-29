@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Result;
-use index::metadata::{self, Metadata};
+use iie::metadata;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
@@ -10,17 +10,10 @@ fn main() -> Result<()> {
     let img_path = args.get(1).unwrap_or(&default_img_path);
     let img_path = Path::new(img_path);
 
+    metadata::write(img_path, metadata::MetadataWriteAction::Rating(5))?;
     metadata::write(
         img_path,
-        &Metadata {
-            rating: 5,
-            description: "A random description.".to_string(),
-            tags: vec![
-                "something".to_string(),
-                "not".to_string(),
-                "right".to_string(),
-            ],
-        },
+        metadata::MetadataWriteAction::Tagging("example".to_string()),
     )?;
 
     Ok(())
