@@ -1,23 +1,18 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
-
-pub fn scan_images(path: &Path) -> Result<Vec<PathBuf>> {
+#[must_use]
+pub fn scan_images(path: &Path) -> Vec<PathBuf> {
     let mut images = Vec::new();
     let mut stack = vec![path.to_path_buf()];
 
     while let Some(current_dir) = stack.pop() {
-        let entries = match fs::read_dir(current_dir) {
-            Ok(entries) => entries,
-            Err(_) => continue,
+        let Ok(entries) = fs::read_dir(current_dir) else {
+            continue;
         };
 
         for entry in entries {
-            let entry = match entry {
-                Ok(e) => e,
-                Err(_) => continue,
-            };
+            let Ok(entry) = entry else { continue };
 
             let file_name = entry.file_name();
             let Some(name_str) = file_name.to_str() else {
@@ -28,9 +23,8 @@ pub fn scan_images(path: &Path) -> Result<Vec<PathBuf>> {
                 continue;
             }
 
-            let file_type = match entry.file_type() {
-                Ok(ft) => ft,
-                Err(_) => continue,
+            let Ok(file_type) = entry.file_type() else {
+                continue;
             };
 
             if file_type.is_dir() {
@@ -47,5 +41,5 @@ pub fn scan_images(path: &Path) -> Result<Vec<PathBuf>> {
         }
     }
 
-    Ok(images)
+    images
 }

@@ -7,13 +7,16 @@ pub const DOT_FOLDER: &str = ".eyeris";
 pub const THUMBNAILS_REL_PATH: &str = ".eyeris/thumbnails/";
 pub const CSV_REL_PATH: &str = ".eyeris/index.csv";
 
+/// # Errors
+///
+/// Fail if path does not exists.
 pub fn prepare_dot_folder(
     root: &Path,
     delete_thumbnails: bool,
     delete_database: bool,
 ) -> Result<()> {
     if !fs::exists(root).unwrap_or(false) {
-        bail!("\"{:?}\" is not exists or not accessible.", root)
+        bail!("\"{}\" is not exists or not accessible.", root.display())
     }
 
     let dot_folder_path = root.join(DOT_FOLDER);

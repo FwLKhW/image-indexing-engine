@@ -13,6 +13,7 @@ use index::{
 
 #[derive(Parser, Debug)]
 #[command(version, about = "An image indexing engine.")]
+#[allow(clippy::struct_excessive_bools)]
 struct Args {
     /// Target folder
     folder_path: String,

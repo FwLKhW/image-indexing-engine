@@ -28,17 +28,17 @@ pub struct IndexedImage {
     pub palette: Vec<[f32; 3]>,
 }
 
+/// # Errors
+///
+/// Path does not exist.
+/// Image path isn't a child of root.
+/// Or failed reading system metadata and xmp metadata.
 pub fn indexing_image(
     img_path: &Path,
     root: &Path,
     hash: bool,
     palette: bool,
 ) -> Result<IndexedImage> {
-    let img = image::open(img_path).with_context(|| format!("failed open image {:?}", img_path))?;
-
-    let sys_meta = fs::metadata(img_path)?;
-    let ext_meta = metadata::read(img_path)?;
-
     let rel_path = img_path.strip_prefix(root)?.to_slash_lossy().to_string();
     let name = img_path
         .file_stem()
@@ -52,19 +52,29 @@ pub fn indexing_image(
         .to_str()
         .unwrap_or_default()
         .to_uppercase();
+
+    let sys_meta = fs::metadata(img_path)?;
     let size = sys_meta.len();
-    let created = sys_meta
-        .created()
-        .unwrap_or(SystemTime::now())
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis() as u64;
-    let modified = sys_meta
-        .modified()
-        .unwrap_or(SystemTime::now())
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis() as u64;
+    let created = u64::try_from(
+        sys_meta
+            .created()
+            .unwrap_or_else(|_| SystemTime::now())
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis(),
+    )?;
+    let modified = u64::try_from(
+        sys_meta
+            .modified()
+            .unwrap_or_else(|_| SystemTime::now())
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis(),
+    )?;
+
+    let img = image::open(img_path)
+        .with_context(|| format!("failed open image {}", img_path.display()))?;
+    let ext_meta = metadata::read(img_path)?;
 
     Ok(IndexedImage {
         path: rel_path,
@@ -81,7 +91,7 @@ pub fn indexing_image(
         hash: if hash {
             hash_image_bytes(img.to_rgba16().as_bytes())
         } else {
-            "".to_string()
+            String::new()
         },
         palette: if palette {
             extract_palette(&img.to_rgb8()).unwrap_or_default()
@@ -91,11 +101,14 @@ pub fn indexing_image(
     })
 }
 
+/// # Errors
+///
+/// Path does not exists or image indexing failed.
 pub fn indexing_folder(root: &Path, hash: bool, palette: bool) -> Result<Vec<IndexedImage>> {
-    let image_paths = scan_images(root)?;
+    let image_paths = scan_images(root);
     let total_images = image_paths.len();
 
-    println!("Indexing {} images...", total_images);
+    println!("Indexing {total_images} images...");
 
     let results: Vec<Result<IndexedImage>> = image_paths
         .par_iter()
@@ -104,7 +117,11 @@ pub fn indexing_folder(root: &Path, hash: bool, palette: bool) -> Result<Vec<Ind
 
     let err_count = results.iter().filter(|i| i.is_err()).count();
 
-    println!("{}/{} done", total_images - err_count, total_images);
+    println!(
+        "{}/{} done",
+        total_images.saturating_sub(err_count),
+        total_images
+    );
     results
         .iter()
         .filter_map(|result| result.as_ref().err())
@@ -112,7 +129,7 @@ pub fn indexing_folder(root: &Path, hash: bool, palette: bool) -> Result<Vec<Ind
         .for_each(|err| eprintln!("\n{err:#}"));
 
     let success_indexed_images: Vec<IndexedImage> =
-        results.into_iter().filter_map(|i| i.ok()).collect();
+        results.into_iter().filter_map(Result::ok).collect();
 
     Ok(success_indexed_images)
 }

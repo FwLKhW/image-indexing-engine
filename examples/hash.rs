@@ -1,15 +1,17 @@
-use anyhow::Result;
-use image::EncodableLayout;
+use anyhow::{Result, bail};
 
-use index::hash::hash_image_bytes;
+use index::hash::hash_image;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
-    let img = image::open(&args[1])?;
-    let hash_result = hash_image_bytes(img.to_rgba16().as_bytes());
+    let Some(img_path) = args.get(1) else {
+        bail!("require image path");
+    };
 
-    println!("{hash_result}");
+    let hash_string = hash_image(&image::open(img_path)?);
+
+    println!("{hash_string}");
 
     Ok(())
 }

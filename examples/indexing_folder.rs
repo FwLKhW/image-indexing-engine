@@ -1,6 +1,6 @@
 use std::{path::Path, time::Instant};
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use index::{
     csv,
     index::indexing_folder,
@@ -9,10 +9,14 @@ use index::{
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
-    let root = Path::new(&args[1]);
+
+    let Some(path) = args.get(1) else {
+        bail!("require folder path");
+    };
 
     let start = Instant::now();
 
+    let root = Path::new(path);
     prepare_dot_folder(root, false, true)?;
     let indexed_images = indexing_folder(root, true, true)?;
 
