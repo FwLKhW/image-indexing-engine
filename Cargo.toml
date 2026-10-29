@@ -8,8 +8,8 @@ default-run = "index"
 [dependencies]
 anyhow = "1.0.104"
 blake3 = "1.8.7"
-colored_text = "0.6.0"
 clap = { version = "4.6.7", features = ["derive"] }
+colored_text = "0.6.0"
 csv = "1.4.0"
 image = { version = "0.25.10", features = [
     "jpeg",
@@ -38,8 +38,29 @@ opt-level = 1
 opt-level = 3
 
 [profile.release]
-strip = true
-opt-level = "z"
-lto = true
 codegen-units = 1
+lto = true
+opt-level = "z"
 panic = "abort"
+strip = true
+
+# https://www.namtao.com/rust/
+[lints.clippy]
+# UM, ACTUALLY
+pedantic = { level = "deny", priority = -1 }
+# DEVELOPING LINTS
+nursery = { level = "deny", priority = -1 }
+# DENY PANICS
+arithmetic_side_effects = "deny"
+as_conversions = "deny"
+exit = "deny"
+expect_used = "deny"
+indexing_slicing = "deny"
+panic = "deny"
+panic_in_result_fn = "deny"
+string_slice = "deny"
+todo = "deny"
+unchecked_time_subtraction = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+unwrap_used = "deny"
