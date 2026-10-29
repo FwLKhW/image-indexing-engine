@@ -27,7 +27,7 @@ struct Args {
     index: bool,
 
     /// Enable extended indexing (hash, palette)
-    #[arg(short = 'a', long, default_value_t = false)]
+    #[arg(short = 'e', long, default_value_t = false)]
     extended: bool,
 }
 

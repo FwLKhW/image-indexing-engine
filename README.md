@@ -6,10 +6,24 @@
 ### Usage
 
 ```sh
-index "~/Pictures/girlfriend/" -tip
+Usage: index.exe [OPTIONS] <FOLDER_PATH>
+
+Arguments:
+  <FOLDER_PATH>  Target folder
+
+Options:
+-t, --thumbnail  Enable generate thumbnails
+-i, --index      Enable basic indexing
+-e, --extended   Enable extended indexing (hash, palette)
 ```
 
-### Output
+#### Example
+
+```sh
+index "~/Pictures/girlfriend/" -tie
+```
+
+#### Output
 
 Under `~/Pictures/girlfriend/`:
 
@@ -44,7 +58,7 @@ The generated `index.csv` contains columns for direct analysis in Python Pandas:
 
 | Column      | Type        | Description                                                | Example                                                                                                               |
 | ----------- | ----------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| id          | Integer     | Auto-incrementing (1-indexed)                              | 42                                                                                                                    |
+| id          | Integer     | Auto-incrementing                                          | 42                                                                                                                    |
 | path        | String      | Relative path to image                                     | "rel_path/to/image.png"                                                                                               |
 | name        | String      | Image name                                                 | "image"                                                                                                               |
 | format      | String      | Image format (PNG, JPG, WEBP)                              | "PNG"                                                                                                                 |
