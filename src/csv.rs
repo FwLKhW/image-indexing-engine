@@ -12,22 +12,8 @@ pub fn write(csv_path: &Path, indexed_images: &[IndexedImage]) -> Result<()> {
     let mut wtr = Writer::from_path(csv_path)?;
 
     wtr.write_record([
-        "id",
-        "path",
-        "name",
-        "format",
-        "size",
-        "width",
-        "height",
-        "created",
-        "modified",
-        "rating",
-        "tags",
-        "hash",
-        "color_1",
-        "color_2",
-        "color_3",
-        "color_4",
+        "id", "path", "name", "format", "size", "width", "height", "created", "modified", "rating",
+        "tags", "hash", "color_1", "color_2", "color_3", "color_4",
     ])?;
 
     let default_color = String::new();

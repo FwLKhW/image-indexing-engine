@@ -8,7 +8,7 @@ use iie::{
     csv,
     index::indexing_folder,
     metadata::{self, MetadataWriteAction},
-    paths::{CSV_REL_PATH},
+    paths::CSV_REL_PATH,
     thumbnail::thumbnailing_folder,
 };
 
