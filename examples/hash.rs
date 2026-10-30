@@ -1,6 +1,6 @@
 use anyhow::{Result, bail};
 
-use iie::hash::hash_image;
+use iie::hash::blake3_hash;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
@@ -9,7 +9,7 @@ fn main() -> Result<()> {
         bail!("require image path");
     };
 
-    let hash_string = hash_image(&image::open(img_path)?);
+    let hash_string = blake3_hash(&image::open(img_path)?);
 
     println!("{hash_string}");
 

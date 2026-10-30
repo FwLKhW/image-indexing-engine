@@ -10,7 +10,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rgb::Rgb;
 
 use crate::{
-    color::extract_colors, hash::hash_image, metadata, paths::DOT_FOLDER, scan::scan_images,
+    color::extract_colors, hash::blake3_hash, metadata, paths::DOT_FOLDER, scan::scan_images,
 };
 
 #[derive(Debug)]
@@ -88,7 +88,7 @@ pub fn indexing_image(img_path: &Path, root: &Path, extended: bool) -> Result<In
 
     if extended {
         let img = image::open(img_path)?;
-        indexed_image.hash = hash_image(&img);
+        indexed_image.hash = blake3_hash(&img);
         indexed_image.colors = extract_colors(&img)?;
     }
 

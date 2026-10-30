@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use image::{DynamicImage, imageops::FilterType};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{hash::hash_image, paths::THUMBNAILS_REL_PATH, scan::scan_images};
+use crate::{hash::blake3_hash, paths::THUMBNAILS_REL_PATH, scan::scan_images};
 
 #[must_use]
 pub fn generate_thumbnail(img: &DynamicImage) -> DynamicImage {
@@ -18,7 +18,7 @@ pub fn thumbnailing_image(img_path: &Path, thumb_path: &Path) -> Result<()> {
     let img = image::open(img_path)
         .with_context(|| format!("failed open image {}", img_path.display()))?;
     let thumbnail = generate_thumbnail(&img);
-    let thumbnail_save_path = thumb_path.join(format!("{}.png", hash_image(&img)));
+    let thumbnail_save_path = thumb_path.join(format!("{}.png", blake3_hash(&img)));
 
     thumbnail.save(&thumbnail_save_path).with_context(|| {
         format!(
