@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{fs, path::Path};
 
 use anyhow::{Context, Result};
 use image::{DynamicImage, imageops::FilterType};
@@ -33,13 +33,15 @@ pub fn thumbnailing_image(img_path: &Path, thumb_path: &Path) -> Result<()> {
 
 /// # Errors
 ///
-/// Will fail if `root` does not exist or
+/// Fail if can not create thumbnails folder
 pub fn thumbnailing_folder(root: &Path) -> Result<()> {
     let image_paths = scan_images(root);
     let total_images = image_paths.len();
 
-    println!("Thumbnailing {total_images} images...");
     let thumb_path = root.join(THUMBNAILS_REL_PATH);
+    fs::create_dir_all(&thumb_path)?;
+
+    println!("Thumbnailing {total_images} images...");
     let results: Vec<Result<()>> = image_paths
         .par_iter()
         .map(|img_path| thumbnailing_image(img_path, &thumb_path))

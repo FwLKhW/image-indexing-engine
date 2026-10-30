@@ -9,7 +9,9 @@ use path_slash::PathExt;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rgb::Rgb;
 
-use crate::{color::extract_colors, hash::hash_image, metadata, scan::scan_images};
+use crate::{
+    color::extract_colors, hash::hash_image, metadata, paths::DOT_FOLDER, scan::scan_images,
+};
 
 #[derive(Debug)]
 pub struct IndexedImage {
@@ -95,13 +97,15 @@ pub fn indexing_image(img_path: &Path, root: &Path, extended: bool) -> Result<In
 
 /// # Errors
 ///
-/// Path does not exists or image indexing failed.
+/// Can not create dot folder or image indexing failed.
 pub fn indexing_folder(root: &Path, extended: bool) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(root);
     let total_images = image_paths.len();
 
-    println!("Indexing {total_images} images...");
+    let dot_folder_path = root.join(DOT_FOLDER);
+    fs::create_dir_all(&dot_folder_path)?;
 
+    println!("Indexing {total_images} images...");
     let results: Vec<Result<IndexedImage>> = image_paths
         .par_iter()
         .map(|img_path| indexing_image(img_path, root, extended))
