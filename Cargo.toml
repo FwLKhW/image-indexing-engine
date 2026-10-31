@@ -25,7 +25,6 @@ rgb = { version = "0.8.53", features = ["as-bytes"], default-features = false }
 rusqlite = "0.41.1"
 xmpkit = { version = "0.1.6", features = [
     "jpeg",
-    "mutli-thread",
     "png",
     "webp",
 ], default-features = false }

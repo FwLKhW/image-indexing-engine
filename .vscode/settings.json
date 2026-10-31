@@ -1,7 +1,15 @@
 {
     "cSpell.words": [
+        "clippy",
+        "codegen",
         "eyeris",
         "imageops",
-        "Lanczos"
+        "Lanczos",
+        "nextest",
+        "okmain",
+        "rusqlite",
+        "srgb",
+        "webp",
+        "xmpkit"
     ]
 }

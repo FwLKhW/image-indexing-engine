@@ -64,7 +64,7 @@ enum Commands {
 enum WriteCommands {
     /// Set rating
     Rating {
-        /// Rating value to be writen (0 to 5)
+        /// Rating value to be written (0 to 5)
         value: u8,
     },
 
