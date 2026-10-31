@@ -1,7 +1,7 @@
 use std::{path::Path, time::Instant};
 
 use anyhow::Result;
-use iie::thumbnail::thumbnailing_folder;
+use iie::thumbnail::generate_thumbnail_for_folder;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
@@ -12,7 +12,7 @@ fn main() -> Result<()> {
 
     let start = Instant::now();
 
-    thumbnailing_folder(folder_path)?;
+    generate_thumbnail_for_folder(folder_path)?;
 
     println!("Take {} seconds", start.elapsed().as_secs_f32());
 

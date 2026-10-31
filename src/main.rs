@@ -9,7 +9,7 @@ use iie::{
     index::indexing_folder,
     metadata::{self, MetadataWriteAction},
     paths::DB_REL_PATH,
-    thumbnail::thumbnailing_folder,
+    thumbnail::generate_thumbnail_for_folder,
 };
 
 #[derive(Parser, Debug)]
@@ -83,7 +83,7 @@ fn main() -> Result<()> {
     match &cli.command {
         Commands::Thumb { folder_path } => {
             let folder_path = PathBuf::from(folder_path);
-            thumbnailing_folder(&folder_path)?;
+            generate_thumbnail_for_folder(&folder_path)?;
         }
         Commands::Index {
             folder_path,
