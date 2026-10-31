@@ -10,7 +10,11 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rgb::Rgb;
 
 use crate::{
-    color::extract_colors, hash::blake3_hash, metadata, paths::DOT_FOLDER, scan::scan_images,
+    color::extract_colors,
+    hash::blake3_hash,
+    metadata,
+    paths::{DB_REL_PATH, DOT_FOLDER},
+    scan::scan_images,
 };
 
 #[derive(Debug)]
@@ -101,6 +105,12 @@ pub fn indexing_image(img_path: &Path, root: &Path, extended: bool) -> Result<In
 pub fn indexing_folder(root: &Path, extended: bool) -> Result<Vec<IndexedImage>> {
     let image_paths = scan_images(root);
     let total_images = image_paths.len();
+
+    let db_path = root.join(DB_REL_PATH);
+    if db_path.exists() {
+        println!("Database exists at {}, skip indexing.", db_path.display());
+        return Ok(vec![]);
+    }
 
     let dot_folder_path = root.join(DOT_FOLDER);
     fs::create_dir_all(&dot_folder_path)?;

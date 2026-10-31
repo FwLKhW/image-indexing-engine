@@ -5,7 +5,11 @@ use clap::{Parser, Subcommand};
 
 use colored_text::Colorize;
 use iie::{
-    db, index::indexing_folder, metadata::{self, MetadataWriteAction}, paths::{DB_REL_PATH, DOT_FOLDER}, thumbnail::generate_thumbnail_for_folder,
+    db,
+    index::indexing_folder,
+    metadata::{self, MetadataWriteAction},
+    paths::{DB_REL_PATH, DOT_FOLDER},
+    thumbnail::generate_thumbnail_for_folder,
 };
 
 #[derive(Parser, Debug)]
