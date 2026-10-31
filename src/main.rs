@@ -5,11 +5,7 @@ use clap::{Parser, Subcommand};
 
 use colored_text::Colorize;
 use iie::{
-    db,
-    index::indexing_folder,
-    metadata::{self, MetadataWriteAction},
-    paths::DB_REL_PATH,
-    thumbnail::generate_thumbnail_for_folder,
+    db, index::indexing_folder, metadata::{self, MetadataWriteAction}, paths::{DB_REL_PATH, DOT_FOLDER}, thumbnail::generate_thumbnail_for_folder,
 };
 
 #[derive(Parser, Debug)]
@@ -35,7 +31,7 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Clean everything
+    /// Clean dot folder
     Clean {
         /// Target folder
         #[arg(required = true)]
@@ -88,8 +84,8 @@ fn main() -> Result<()> {
 
     match &cli.command {
         Commands::Clean { folder_path } => {
-            let folder_path = PathBuf::from(folder_path);
-            fs::remove_dir_all(folder_path)?;
+            let dot_folder_path = PathBuf::from(folder_path).join(DOT_FOLDER);
+            fs::remove_dir_all(dot_folder_path)?;
         }
         Commands::Thumb { folder_path } => {
             let folder_path = PathBuf::from(folder_path);
