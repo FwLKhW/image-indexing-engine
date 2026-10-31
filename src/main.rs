@@ -5,10 +5,10 @@ use clap::{Parser, Subcommand};
 
 use colored_text::Colorize;
 use iie::{
-    csv,
+    db,
     index::indexing_folder,
     metadata::{self, MetadataWriteAction},
-    paths::CSV_REL_PATH,
+    paths::DB_REL_PATH,
     thumbnail::thumbnailing_folder,
 };
 
@@ -18,13 +18,13 @@ use iie::{
     name = "iie",
     about = "An image indexing engine.",
     long_about = "\n
-    ███ ███ ███████ 
-     █   █  █       
-     █   █  █       
-     █   █  █████   
-     █   █  █       
-     █   █  █       
-    ███ ███ ███████ 
+    ███ ███ ███████
+     █   █  █
+     █   █  █
+     █   █  █████
+     █   █  █
+     █   █  █
+    ███ ███ ███████
 
 An image indexing engine."
 )]
@@ -91,7 +91,8 @@ fn main() -> Result<()> {
         } => {
             let folder_path = PathBuf::from(folder_path);
             let indexed_images = indexing_folder(&folder_path, *extended)?;
-            csv::write(&folder_path.join(CSV_REL_PATH), &indexed_images)?;
+            // csv::write(&folder_path.join(CSV_REL_PATH), &indexed_images)?;
+            db::write(&folder_path.join(DB_REL_PATH), &indexed_images)?;
         }
         Commands::Write {
             image_path,

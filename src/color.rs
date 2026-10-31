@@ -24,3 +24,8 @@ pub fn extract_colors(img: &DynamicImage) -> Result<Vec<Rgb<u8>>> {
 pub fn rgb2hex(rgb: &Rgb<u8>) -> String {
     format!("#{:02X}{:02X}{:02X}", rgb.r, rgb.g, rgb.b)
 }
+
+#[must_use]
+pub fn rgb2hex_oct(rgb: &Rgb<u8>) -> i64 {
+    i64::from(rgb.r) * 65536 + i64::from(rgb.g) * 256 + i64::from(rgb.b)
+}
