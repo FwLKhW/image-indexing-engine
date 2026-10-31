@@ -30,3 +30,12 @@ pub fn rgb2hex(rgb: &Rgb<u8>) -> String {
 pub fn rgb2dec(rgb: &Rgb<u8>) -> i64 {
     (i64::from(rgb.r) << 16) + (i64::from(rgb.g) << 8) + (i64::from(rgb.b))
 }
+
+#[must_use]
+pub fn dec2rgb(dec: i64) -> Rgb<u8> {
+    Rgb {
+        r: ((dec >> 16) & 0xFF) as u8,
+        g: ((dec >> 8) & 0xFF) as u8,
+        b: (dec & 0xFF) as u8,
+    }
+}
