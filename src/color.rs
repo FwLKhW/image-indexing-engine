@@ -26,6 +26,7 @@ pub fn rgb2hex(rgb: &Rgb<u8>) -> String {
 }
 
 #[must_use]
-pub fn rgb2hex_oct(rgb: &Rgb<u8>) -> i64 {
-    i64::from(rgb.r) * 65536 + i64::from(rgb.g) * 256 + i64::from(rgb.b)
+#[allow(clippy::arithmetic_side_effects)]
+pub fn rgb2dec(rgb: &Rgb<u8>) -> i64 {
+    (i64::from(rgb.r) << 16) + (i64::from(rgb.g) << 8) + (i64::from(rgb.b))
 }
