@@ -1,10 +1,10 @@
 use std::{fs, path::Path};
 
 use anyhow::{Context, Result};
-use image::{imageops::FilterType};
+use image::imageops::FilterType;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{hash::blake3_hash, paths::THUMBNAILS_REL_PATH, scan::scan_images};
+use crate::{hash::blake3_hash, paths::{THUMBNAILS_REL_PATH}, scan::scan_images};
 
 /// # Errors
 ///
@@ -12,9 +12,13 @@ use crate::{hash::blake3_hash, paths::THUMBNAILS_REL_PATH, scan::scan_images};
 pub fn generate_thumbnail_for_image(img_path: &Path, thumb_path: &Path) -> Result<()> {
     let img = image::open(img_path)
         .with_context(|| format!("failed open image {}", img_path.display()))?;
-    let thumbnail = img.resize(512, 512, FilterType::Lanczos3);
     let thumbnail_save_path = thumb_path.join(format!("{}.png", blake3_hash(&img)));
 
+    if thumbnail_save_path.exists() {
+        return Ok(());
+    }
+
+    let thumbnail = img.resize(512, 512, FilterType::Lanczos3);
     thumbnail.save(&thumbnail_save_path).with_context(|| {
         format!(
             "failed save thumbnail for {} at {}",
