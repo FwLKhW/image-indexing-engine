@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use image::imageops::FilterType;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{hash::blake3_hash, paths::{THUMBNAILS_REL_PATH}, scan::scan_images};
+use crate::{hash::blake3_hash, paths::THUMBNAILS_REL_PATH, scan::scan_images};
 
 /// # Errors
 ///

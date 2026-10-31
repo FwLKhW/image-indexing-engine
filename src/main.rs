@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::Instant};
+use std::{fs, path::PathBuf, time::Instant};
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -35,6 +35,12 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    /// Clean everything
+    Clean {
+        /// Target folder
+        #[arg(required = true)]
+        folder_path: String,
+    },
     /// Generate thumbnails
     Thumb {
         /// Target folder
@@ -81,6 +87,10 @@ fn main() -> Result<()> {
     let start = Instant::now();
 
     match &cli.command {
+        Commands::Clean { folder_path } => {
+            let folder_path = PathBuf::from(folder_path);
+            fs::remove_dir_all(folder_path)?;
+        }
         Commands::Thumb { folder_path } => {
             let folder_path = PathBuf::from(folder_path);
             generate_thumbnail_for_folder(&folder_path)?;
@@ -91,7 +101,6 @@ fn main() -> Result<()> {
         } => {
             let folder_path = PathBuf::from(folder_path);
             let indexed_images = indexing_folder(&folder_path, *extended)?;
-            // csv::write(&folder_path.join(CSV_REL_PATH), &indexed_images)?;
             db::write(&folder_path.join(DB_REL_PATH), &indexed_images)?;
         }
         Commands::Write {
