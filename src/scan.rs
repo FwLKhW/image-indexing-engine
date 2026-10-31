@@ -33,8 +33,7 @@ pub fn scan_images(path: &Path) -> Vec<PathBuf> {
                 && let Some(ext) = entry.path().extension().and_then(|e| e.to_str())
             {
                 let ext_lower = ext.to_ascii_lowercase();
-                // TODO: fixed file exts seem not right
-                if matches!(ext_lower.as_str(), "jpg" | "jpeg" | "png" | "webp") {
+                if matches!(ext_lower.as_str(), "jpg" | "jpeg" | "png") {
                     images.push(entry.path());
                 }
             }

@@ -81,7 +81,7 @@ The generated `index.db` contains columns:
 | id       | INTEGER | Auto-incrementing                       | `42`                      |
 | path     | TEXT    | Relative path to image                  | `"rel_path/to/image.png"` |
 | name     | TEXT    | Image name                              | `"image"`                 |
-| format   | TEXT    | Image format (PNG, JPG, WEBP)           | `"PNG"`                   |
+| format   | TEXT    | Image format (PNG, JPG)                 | `"PNG"`                   |
 | size     | INTEGER | File size in bytes                      | `2478406`                 |
 | width    | INTEGER | Image width in pixels                   | `3840`                    |
 | height   | INTEGER | Image height in pixels                  | `2160`                    |
@@ -97,5 +97,9 @@ The generated `index.db` contains columns:
 
 ### Supported Image Formats
 
-| `PNG` | `JPG` | `WEBP` |
-| ----- | ----- | ------ |
+| `PNG` | `JPG` |
+| ----- | ----- |
+
+More modern formats like `WEBP`, `AVIF` or `HEIC`/`HEIF` doesn't supported because `xmpkit` messy with them.
+
+Less common formats doesn't supported because I don't like.

@@ -15,7 +15,6 @@ image = { version = "0.25.10", features = [
     "jpeg",
     "png",
     "rayon",
-    "webp",
 ], default-features = false }
 imagesize = "0.15.0"
 okmain = "0.2.0"
@@ -26,7 +25,6 @@ rusqlite = "0.41.1"
 xmpkit = { version = "0.1.6", features = [
     "jpeg",
     "png",
-    "webp",
 ], default-features = false }
 
 
