@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::Result;
 use rusqlite::{Connection, params};
 
-use crate::{color::rgb2hex_oct, index::IndexedImage};
+use crate::{color::rgb2dec, index::IndexedImage};
 
 /// # Errors
 ///
@@ -43,19 +43,19 @@ pub fn write(db_path: &Path, indexed_images: &[IndexedImage]) -> Result<()> {
         )?;
 
         for (id, img) in indexed_images.iter().enumerate() {
-            let colors_int: Vec<i64> = img.colors.iter().map(rgb2hex_oct).collect();
+            let colors_int: Vec<i64> = img.colors.iter().map(rgb2dec).collect();
 
             stmt.execute(params![
-                id as i64,
+                id.cast_signed(),
                 img.path,
                 img.name,
                 img.format,
-                img.size as i64,
-                img.width as i64,
-                img.height as i64,
+                img.size.cast_signed(),
+                img.width.cast_signed(),
+                img.height.cast_signed(),
                 img.created.to_string(),
                 img.modified.to_string(),
-                img.rating as i64,
+                img.rating.cast_signed(),
                 img.tags.join("|"),
                 img.hash,
                 colors_int.first(),
