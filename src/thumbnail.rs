@@ -38,6 +38,14 @@ pub fn generate_thumbnail_for_folder(root: &Path) -> Result<()> {
     let total_images = image_paths.len();
 
     let thumb_path = root.join(THUMBNAILS_REL_PATH);
+    if thumb_path.exists() {
+        println!(
+            "Thumbnails folder exists at {}, skip generate thumbnails.",
+            thumb_path.display()
+        );
+        return Ok(());
+    }
+
     fs::create_dir_all(&thumb_path)?;
 
     println!("Generating {total_images} thumbnails...");
